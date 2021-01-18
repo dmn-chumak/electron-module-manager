@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "baseUrl": "/",
+        "outDir": "./output/",
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "allowJs": false,
+        "sourceMap": false,
+        "declaration": true,
+        "jsx": "react",
+        "module": "commonjs",
+        "target": "es5"
+    },
+    "include": [
+        "source"
+    ],
+    "exclude": [
+        "node_modules",
+        "output"
+    ]
+}
