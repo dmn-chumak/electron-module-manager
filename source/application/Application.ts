@@ -5,6 +5,7 @@ import { Class } from './typedefs/Class';
 import { Dictionary } from './typedefs/Dictionary';
 import { Vector } from './typedefs/Vector';
 import { Window } from './Window';
+import { WindowInitOptions } from './WindowInitOptions';
 import { WindowManager } from './WindowManager';
 import { WindowOptions } from './WindowOptions';
 
@@ -12,14 +13,15 @@ export class Application<ModuleType extends number> {
     private readonly _windowManager:WindowManager<ModuleType>;
     private readonly _moduleMap:Dictionary<Module<ModuleType>>;
 
-    public constructor(windowPath:string, bridgeScriptPath:string, moduleMap:Dictionary<Module<ModuleType>>) {
+    public constructor(windowPath:string, bridgeScriptPath:string, moduleMap:Dictionary<Class<Module<ModuleType>>>) {
         this._windowManager = new WindowManager<ModuleType>(this, windowPath, bridgeScriptPath);
-        this._moduleMap = moduleMap;
+        this._moduleMap = {};
 
         //-----------------------------------
 
-        for (const moduleType in this._moduleMap) {
-            if (this._moduleMap.hasOwnProperty(moduleType)) {
+        for (const moduleType in moduleMap) {
+            if (moduleMap.hasOwnProperty(moduleType)) {
+                this._moduleMap[moduleType] = new moduleMap[moduleType]();
                 this._moduleMap[moduleType].initialize(this);
             }
         }
@@ -51,12 +53,20 @@ export class Application<ModuleType extends number> {
         Electron.app.quit();
     }
 
-    public async createWindow(windowType:Class<Window<ModuleType>>, options:WindowOptions<ModuleType>):Promise<Window<ModuleType>> {
-        return await this._windowManager.compose(windowType, options);
+    public async createWindowWithType(windowType:Class<Window<ModuleType>>, options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
+        return await this._windowManager.compose(windowType, this.prepareWindowOptions(options));
     }
 
-    public async createWindowParent(windowType:Class<Window<ModuleType>>, options:WindowOptions<ModuleType>):Promise<Window<ModuleType>> {
-        return await this._windowManager.composeParent(windowType, options);
+    public async createWindow(options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
+        return await this.createWindowWithType(Window, options);
+    }
+
+    public async createWindowParentWithType(windowType:Class<Window<ModuleType>>, options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
+        return await this._windowManager.composeParent(windowType, this.prepareWindowOptions(options));
+    }
+
+    public async createWindowParent(options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
+        return await this.createWindowWithType(Window, options);
     }
 
     public closeWindow(moduleType:ModuleType):void {
@@ -73,6 +83,15 @@ export class Application<ModuleType extends number> {
 
     public obtainState<ModuleState>(moduleType:ModuleType):Readonly<ModuleState> {
         return this._moduleMap[moduleType].state;
+    }
+
+    private prepareWindowOptions(options:WindowInitOptions<ModuleType>):WindowOptions<ModuleType> {
+        options = (typeof(options) === 'number') ? { moduleType: options } : options;
+
+        return {
+            ...this._moduleMap[options.moduleType].windowOptions,
+            ...options
+        };
     }
 
     private attachIpcListeners():void {

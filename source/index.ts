@@ -13,6 +13,7 @@ export * from './application/Module';
 export * from './application/ModuleOptions';
 export * from './application/ModuleView';
 export * from './application/Window';
+export * from './application/WindowInitOptions';
 export * from './application/WindowManager';
 export * from './application/WindowOptions';
 export * from './application/WindowState';

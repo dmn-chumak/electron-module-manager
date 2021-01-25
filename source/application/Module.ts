@@ -1,5 +1,6 @@
 import { Application } from './Application';
 import { Vector } from './typedefs/Vector';
+import { WindowOptions } from './WindowOptions';
 
 export abstract class Module<ModuleType extends number, ModuleState = any> {
     protected readonly _moduleType:ModuleType;
@@ -36,6 +37,10 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
 
     public get moduleType():Readonly<ModuleType> {
         return this._moduleType;
+    }
+
+    public get windowOptions():Partial<WindowOptions<ModuleType>> {
+        return {};
     }
 
     public get state():Readonly<ModuleState> {
