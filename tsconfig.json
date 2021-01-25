@@ -2,14 +2,19 @@
     "compilerOptions": {
         "baseUrl": "/",
         "outDir": "./output/",
+
         "noImplicitAny": true,
         "noImplicitReturns": true,
+        "noImplicitThis": true,
         "allowJs": false,
+
+        "moduleResolution": "node",
         "sourceMap": false,
+        "declarationMap": false,
         "declaration": true,
         "jsx": "react",
-        "module": "commonjs",
-        "target": "es5"
+        "module": "esnext",
+        "target": "esnext"
     },
     "include": [
         "source"

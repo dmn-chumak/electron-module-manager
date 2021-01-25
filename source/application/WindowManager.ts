@@ -2,7 +2,6 @@ import { Application } from './Application';
 import { Class } from './typedefs/Class';
 import { Vector } from './typedefs/Vector';
 import { Window } from './Window';
-import { WindowEvent } from './WindowEvent';
 import { WindowOptions } from './WindowOptions';
 
 export class WindowManager<ModuleType extends number> {
@@ -20,7 +19,7 @@ export class WindowManager<ModuleType extends number> {
         this._parent = null;
     }
 
-    protected windowCloseHandler = (event:WindowEvent):void => {
+    protected windowCloseHandler = (event:any /* Electron.Event */):void => {
         for (let index = 0; index < this._windowList.length; index++) {
             const window = this._windowList[index];
 

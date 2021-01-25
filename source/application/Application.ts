@@ -1,5 +1,5 @@
-import * as Electron from 'electron';
 import { BridgeRequestType } from './BridgeRequestType';
+import { Electron } from './ElectronResolver';
 import { Module } from './Module';
 import { Class } from './typedefs/Class';
 import { Dictionary } from './typedefs/Dictionary';
@@ -28,7 +28,6 @@ export class Application<ModuleType extends number> {
 
         if (Electron.app.requestSingleInstanceLock()) {
             Electron.app.allowRendererProcessReuse = true;
-            Electron.app.commandLine.appendSwitch('remote-debugging-port', '4949');
             Electron.app.applicationMenu = null;
 
             //-----------------------------------
@@ -79,7 +78,7 @@ export class Application<ModuleType extends number> {
     private attachIpcListeners():void {
         Electron.ipcMain.handle(
             BridgeRequestType.PROCESS_MODULE_REQUEST,
-            async (event, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> => {
+            async (event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> => {
                 const module = this._moduleMap[moduleType];
 
                 if (module != null) {

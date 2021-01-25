@@ -1,6 +1,6 @@
-import * as Electron from 'electron';
 import { Application } from './Application';
 import { BridgeRequestType } from './BridgeRequestType';
+import { Electron } from './ElectronResolver';
 import { WindowOptions } from './WindowOptions';
 import { WindowState } from './WindowState';
 
@@ -8,7 +8,7 @@ export class Window<ModuleType extends number> {
     protected readonly _moduleType:ModuleType;
     protected readonly _windowOptions:WindowOptions<ModuleType>;
     protected readonly _application:Application<ModuleType>;
-    protected _nativeWindow:Electron.BrowserWindow;
+    protected _nativeWindow:any /* Electron.BrowserWindow */;
 
     public constructor(application:Application<ModuleType>, options:WindowOptions<ModuleType>, parent:Window<ModuleType> = null) {
         this._application = application;
@@ -151,7 +151,7 @@ export class Window<ModuleType extends number> {
         }
     }
 
-    public get nativeWindow():Electron.BrowserWindow {
+    public get nativeWindow():any /* Electron.BrowserWindow */ {
         return this._nativeWindow;
     }
 

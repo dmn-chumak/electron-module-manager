@@ -1,12 +1,12 @@
-import * as Electron from 'electron';
 import { BridgeContext } from './BridgeContext';
 import { BridgeRequestType } from './BridgeRequestType';
+import { Electron } from './ElectronResolver';
 import { Vector } from './typedefs/Vector';
 
 export const DEFAULT_BRIDGE_CONTEXT:BridgeContext = {
     handle: async (requestType:BridgeRequestType, handler:(content:any) => void):Promise<void> => {
         Electron.ipcRenderer.on(
-            requestType, (event, content:any) => {
+            requestType, (event:any /* Electron.IpcRendererEvent */, content:any) => {
                 handler(content);
             }
         );
