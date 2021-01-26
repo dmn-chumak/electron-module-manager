@@ -14,6 +14,7 @@ export class WindowProcessWorker {
             BridgeRequestType.INITIALIZE_WINDOW_STATE,
             (options:WindowOptions<ModuleType>):void => {
                 const wrapper = document.querySelector('#application');
+                document.title = options.moduleTitle;
 
                 if (moduleViewMap != null) {
                     options.moduleViewMap = moduleViewMap;

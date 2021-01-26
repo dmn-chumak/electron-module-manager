@@ -10,13 +10,8 @@ export class ModuleView<ModuleType, ModuleState = any, ModuleContext = any> exte
         super(props);
 
         this._context = BridgeWrapper.createModuleContext(props.moduleType);
+        this.state = { ...props.initialState };
 
-        this.state = {
-            ...props.initialState
-        };
-    }
-
-    public componentDidMount():void {
         BridgeWrapper.context.handle(
             BridgeRequestType.UPDATE_MODULE_STATE,
             (state:ModuleState):void => {

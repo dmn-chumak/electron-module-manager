@@ -66,7 +66,7 @@ export class Application<ModuleType extends number> {
     }
 
     public async createWindowParent(options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
-        return await this.createWindowWithType(Window, options);
+        return await this.createWindowParentWithType(Window, options);
     }
 
     public closeWindow(moduleType:ModuleType):void {
