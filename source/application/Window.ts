@@ -78,7 +78,11 @@ export class Window<ModuleType extends number> {
         this._nativeWindow.webContents.send(
             BridgeRequestType.INITIALIZE_WINDOW_STATE, {
                 moduleInitialState: this._application.obtainState(this._moduleType),
-                ...this._windowOptions
+                ...this._windowOptions,
+                windowInitialState: {
+                    isMaximized: this._nativeWindow.isMaximized(),
+                    isBlurred: !this._nativeWindow.isFocused()
+                }
             }
         );
     };

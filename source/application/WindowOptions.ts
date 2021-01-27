@@ -6,9 +6,11 @@ export interface WindowOptions<ModuleType> {
     moduleIcon?:string;
 
     forceDevTools?:boolean;
+    allowMultipleInstances?:boolean;
     bridgePath?:string;
     attachParent?:boolean;
 
+    windowInitialState?:any;
     isCentered?:boolean;
     isMinimizable?:boolean;
     isResizable?:boolean;

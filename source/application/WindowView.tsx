@@ -7,20 +7,16 @@ import { WindowOptions } from './WindowOptions';
 import { WindowState } from './WindowState';
 
 export class WindowView<ModuleType> extends React.Component<WindowOptions<ModuleType>, WindowState> {
-    protected readonly _moduleRef:React.RefObject<ModuleView<ModuleType>>;
+    protected readonly _moduleViewRef:React.RefObject<ModuleView<ModuleType>>;
 
     public constructor(props:WindowOptions<ModuleType>) {
         super(props);
 
-        this._moduleRef = React.createRef();
-
+        this._moduleViewRef = React.createRef();
         this.state = {
-            isMaximized: false,
-            isBlurred: true
+            ...props.windowInitialState
         };
-    }
 
-    public componentDidMount():void {
         BridgeWrapper.context.handle(
             BridgeRequestType.UPDATE_WINDOW_STATE,
             (state:WindowState):void => {
@@ -34,7 +30,7 @@ export class WindowView<ModuleType> extends React.Component<WindowOptions<Module
             moduleView, {
                 moduleType: this.props.moduleType,
                 initialState: this.props.moduleInitialState,
-                ref: this._moduleRef
+                ref: this._moduleViewRef
             }
         );
     }

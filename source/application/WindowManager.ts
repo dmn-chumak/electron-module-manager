@@ -43,6 +43,17 @@ export class WindowManager<ModuleType extends number> {
 
         //-----------------------------------
 
+        if (options.allowMultipleInstances !== true) {
+            for (const window of this._windowList) {
+                if (window.moduleType === options.moduleType) {
+                    window.restore();
+                    return window;
+                }
+            }
+        }
+
+        //-----------------------------------
+
         const parent = (options.attachParent ? this._parent : null);
         const window = new windowType(this._application, options, parent);
 

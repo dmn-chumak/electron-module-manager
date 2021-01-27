@@ -3,6 +3,10 @@ import { Vector } from './typedefs/Vector';
 import { WindowOptions } from './WindowOptions';
 
 export abstract class Module<ModuleType extends number, ModuleState = any> {
+    protected static readonly FORBIDDEN_METHODS_LIST:Vector<string> = [
+        'initialize', 'process', 'resetAndUpdateState', 'updateState', 'constructor'
+    ];
+
     protected readonly _moduleType:ModuleType;
     protected _application:Application<ModuleType>;
     protected _state:ModuleState;
@@ -22,7 +26,7 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
 
         //-----------------------------------
 
-        if (action !== 'process' && typeof (handler[action]) === 'function') {
+        if (Module.FORBIDDEN_METHODS_LIST.indexOf(action) === -1 && typeof (handler[action]) === 'function') {
             return await handler[action](...content);
         }
 
@@ -32,6 +36,10 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
     }
 
     public updateState(state:Partial<ModuleState>):ModuleState {
+        return this._state = { ...this._state, ...state };
+    }
+
+    public resetAndUpdateState(state:Partial<ModuleState>):ModuleState {
         return this._state = { ...this._state, ...state };
     }
 

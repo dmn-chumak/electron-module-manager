@@ -45,6 +45,7 @@ export class Application<ModuleType extends number> {
 
             this.attachIpcListeners();
             this.attachAppListeners();
+
             return;
         }
 
@@ -75,6 +76,14 @@ export class Application<ModuleType extends number> {
 
     public updateState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = false):void {
         const fullState = this._moduleMap[moduleType].updateState(state);
+
+        if (notifyView) {
+            this._windowManager.updateState(moduleType, fullState);
+        }
+    }
+
+    public resetAndUpdateState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = false):void {
+        const fullState = this._moduleMap[moduleType].resetAndUpdateState(state);
 
         if (notifyView) {
             this._windowManager.updateState(moduleType, fullState);
