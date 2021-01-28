@@ -35,7 +35,7 @@ export class WindowManager<ModuleType extends number> {
         }
     };
 
-    public async compose(windowType:Class<Window<ModuleType>>, options:WindowOptions<ModuleType>):Promise<Window<ModuleType>> {
+    public async create(windowType:Class<Window<ModuleType>>, options:WindowOptions<ModuleType>):Promise<Window<ModuleType>> {
         options = {
             bridgePath: this._bridgeScriptPath,
             ...options
@@ -57,7 +57,7 @@ export class WindowManager<ModuleType extends number> {
         const parent = (options.attachParent ? this._parent : null);
         const window = new windowType(this._application, options, parent);
 
-        await window.compose(this._windowPath);
+        await window.initialize(this._windowPath);
         window.nativeWindow.on('closed', this.windowCloseHandler);
         this._windowList.push(window);
 
@@ -66,8 +66,8 @@ export class WindowManager<ModuleType extends number> {
         return window;
     }
 
-    public async composeParent(windowType:Class<Window<ModuleType>>, options:WindowOptions<ModuleType>):Promise<Window<ModuleType>> {
-        const window = await this.compose(windowType, {
+    public async createParent(windowType:Class<Window<ModuleType>>, options:WindowOptions<ModuleType>):Promise<Window<ModuleType>> {
+        const window = await this.create(windowType, {
             ...options,
             attachParent: false,
             isModal: false
@@ -76,7 +76,7 @@ export class WindowManager<ModuleType extends number> {
         //-----------------------------------
 
         if (this._parent != null) {
-            this._parent.dispose();
+            this._parent.close();
         }
 
         this._parent = window;
@@ -94,13 +94,13 @@ export class WindowManager<ModuleType extends number> {
         }
     }
 
-    public dispose(moduleType:ModuleType):void {
+    public close(moduleType:ModuleType):void {
         for (let index = 0; index < this._windowList.length; index++) {
             const window = this._windowList[index];
 
             if (window.moduleType === moduleType) {
                 this._windowList.splice(index, 1);
-                window.dispose();
+                window.close();
 
                 if (this._parent === window) {
                     this._parent = null;

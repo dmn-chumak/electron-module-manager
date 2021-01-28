@@ -16,33 +16,9 @@ export class Window<ModuleType extends number> {
 
         //-----------------------------------
 
-        this._nativeWindow = new Electron.BrowserWindow({
-            webPreferences: {
-                defaultEncoding: 'utf-8',
-                backgroundThrottling: false,
-                webSecurity: true,
-                contextIsolation: true,
-                preload: options.bridgePath,
-                worldSafeExecuteJavaScript: true,
-                spellcheck: false,
-                sandbox: true
-            },
-            useContentSize: true,
-            maximizable: options.isResizable,
-            resizable: options.isResizable,
-            minimizable: options.isMinimizable,
-            parent: (parent != null ? parent.nativeWindow : null),
-            acceptFirstMouse: true,
-            modal: options.isModal,
-            center: options.isCentered,
-            minHeight: options.minHeight,
-            minWidth: options.minWidth,
-            height: options.height,
-            width: options.width,
-            title: options.moduleTitle,
-            icon: options.moduleIcon,
-            show: false
-        });
+        this._nativeWindow = new Electron.BrowserWindow(
+            this.createBrowserWindowOptions(options, parent)
+        );
 
         //-----------------------------------
 
@@ -91,7 +67,7 @@ export class Window<ModuleType extends number> {
         this._nativeWindow = null;
     };
 
-    public async compose(windowPath:string):Promise<void> {
+    public async initialize(windowPath:string):Promise<void> {
         await this._nativeWindow.loadFile(windowPath);
 
         //-----------------------------------
@@ -104,6 +80,36 @@ export class Window<ModuleType extends number> {
         if (this._windowOptions.forceDevTools) {
             this.restoreDevTools();
         }
+    }
+
+    protected createBrowserWindowOptions(options:WindowOptions<ModuleType>, parent:Window<ModuleType>):any {
+        return {
+            webPreferences: {
+                defaultEncoding: 'utf-8',
+                backgroundThrottling: false,
+                webSecurity: true,
+                contextIsolation: true,
+                preload: options.bridgePath,
+                worldSafeExecuteJavaScript: true,
+                spellcheck: false,
+                sandbox: true
+            },
+            useContentSize: true,
+            maximizable: options.isResizable,
+            resizable: options.isResizable,
+            minimizable: options.isMinimizable,
+            parent: (parent != null ? parent.nativeWindow : null),
+            acceptFirstMouse: true,
+            modal: options.isModal,
+            center: options.isCentered,
+            minHeight: options.minHeight,
+            minWidth: options.minWidth,
+            height: options.height,
+            width: options.width,
+            title: options.moduleTitle,
+            icon: options.moduleIcon,
+            show: false
+        };
     }
 
     public updateWindowState(state:WindowState):void {
@@ -138,7 +144,7 @@ export class Window<ModuleType extends number> {
         }
     }
 
-    public dispose():void {
+    public close():void {
         if (this._nativeWindow != null) {
             this._nativeWindow.close();
             this._nativeWindow = null;

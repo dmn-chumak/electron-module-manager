@@ -55,7 +55,7 @@ export class Application<ModuleType extends number> {
     }
 
     public async createWindowWithType(windowType:Class<Window<ModuleType>>, options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
-        return await this._windowManager.compose(windowType, this.prepareWindowOptions(options));
+        return await this._windowManager.create(windowType, this.prepareWindowOptions(options));
     }
 
     public async createWindow(options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
@@ -63,7 +63,7 @@ export class Application<ModuleType extends number> {
     }
 
     public async createWindowParentWithType(windowType:Class<Window<ModuleType>>, options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
-        return await this._windowManager.composeParent(windowType, this.prepareWindowOptions(options));
+        return await this._windowManager.createParent(windowType, this.prepareWindowOptions(options));
     }
 
     public async createWindowParent(options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
@@ -71,7 +71,7 @@ export class Application<ModuleType extends number> {
     }
 
     public closeWindow(moduleType:ModuleType):void {
-        this._windowManager.dispose(moduleType);
+        this._windowManager.close(moduleType);
     }
 
     public updateState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = false):void {
