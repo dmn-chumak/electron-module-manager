@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "baseUrl": "/",
+        "outDir": "./output/",
+
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "allowJs": false,
+
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "jsx": "react",
+        "module": "esnext",
+        "target": "esnext"
+    },
+    "exclude": [
+        "resource",
+        "node_modules",
+        "output"
+    ]
+}
