@@ -6,13 +6,16 @@ import { WindowState } from './WindowState';
 
 export class Window<ModuleType extends number> {
     protected readonly _moduleType:ModuleType;
+    protected readonly _nativeWindow:any /* Electron.BrowserWindow */;
     protected readonly _windowOptions:WindowOptions<ModuleType>;
     protected readonly _application:Application<ModuleType>;
-    protected _nativeWindow:any /* Electron.BrowserWindow */;
+
+    protected _isActive:boolean;
 
     public constructor(application:Application<ModuleType>, options:WindowOptions<ModuleType>, parent:Window<ModuleType> = null) {
         this._application = application;
         this._moduleType = options.moduleType;
+        this._isActive = false;
 
         //-----------------------------------
 
@@ -64,7 +67,7 @@ export class Window<ModuleType extends number> {
     };
 
     protected windowCloseHandler = ():void => {
-        this._nativeWindow = null;
+        this._isActive = false;
     };
 
     public async initialize(windowPath:string):Promise<void> {
@@ -78,6 +81,7 @@ export class Window<ModuleType extends number> {
 
         this._nativeWindow.setMenu(null);
         this._nativeWindow.show();
+        this._isActive = true;
 
         //-----------------------------------
 
@@ -116,7 +120,7 @@ export class Window<ModuleType extends number> {
     }
 
     public updateWindowState(state:WindowState):void {
-        if (this._nativeWindow != null) {
+        if (this._isActive) {
             this._nativeWindow.webContents.send(
                 BridgeRequestType.UPDATE_WINDOW_STATE,
                 state
@@ -125,7 +129,7 @@ export class Window<ModuleType extends number> {
     }
 
     public updateModuleState<ModuleState>(state:ModuleState):void {
-        if (this._nativeWindow != null) {
+        if (this._isActive) {
             this._nativeWindow.webContents.send(
                 BridgeRequestType.UPDATE_MODULE_STATE,
                 state
@@ -134,7 +138,7 @@ export class Window<ModuleType extends number> {
     }
 
     public restoreDevTools():void {
-        if (this._nativeWindow != null) {
+        if (this._isActive) {
             const webContents = this._nativeWindow.webContents;
 
             if (webContents.isDevToolsOpened()) {
@@ -148,14 +152,14 @@ export class Window<ModuleType extends number> {
     }
 
     public close():void {
-        if (this._nativeWindow != null) {
+        if (this._isActive) {
             this._nativeWindow.close();
-            this._nativeWindow = null;
+            this._isActive = false;
         }
     }
 
     public restore():void {
-        if (this._nativeWindow != null) {
+        if (this._isActive) {
             if (this._nativeWindow.isMinimized()) {
                 this._nativeWindow.restore();
             }
@@ -164,11 +168,15 @@ export class Window<ModuleType extends number> {
         }
     }
 
+    public get moduleType():ModuleType {
+        return this._moduleType;
+    }
+
     public get nativeWindow():any /* Electron.BrowserWindow */ {
         return this._nativeWindow;
     }
 
-    public get moduleType():ModuleType {
-        return this._moduleType;
+    public get isActive():boolean {
+        return this._isActive;
     }
 }

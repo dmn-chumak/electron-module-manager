@@ -131,4 +131,8 @@ export class Application<ModuleType extends number> {
     protected appReadyHandler = ():void => {
         // empty..
     };
+
+    public get windowManager():WindowManager<ModuleType> {
+        return this._windowManager;
+    }
 }
