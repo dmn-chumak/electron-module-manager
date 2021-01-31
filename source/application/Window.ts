@@ -72,6 +72,10 @@ export class Window<ModuleType extends number> {
 
         //-----------------------------------
 
+        if (this._windowOptions.moduleIcon != null) {
+            this._nativeWindow.setIcon(this._windowOptions.moduleIcon);
+        }
+
         this._nativeWindow.setMenu(null);
         this._nativeWindow.show();
 
@@ -107,7 +111,6 @@ export class Window<ModuleType extends number> {
             height: options.height,
             width: options.width,
             title: options.moduleTitle,
-            icon: options.moduleIcon,
             show: false
         };
     }

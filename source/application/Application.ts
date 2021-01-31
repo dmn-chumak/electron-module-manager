@@ -10,10 +10,10 @@ import { WindowManager } from './WindowManager';
 import { WindowOptions } from './WindowOptions';
 
 export class Application<ModuleType extends number> {
-    private readonly _windowManager:WindowManager<ModuleType>;
-    private readonly _moduleMap:Dictionary<Module<ModuleType>>;
+    protected readonly _windowManager:WindowManager<ModuleType>;
+    protected readonly _moduleMap:Dictionary<Module<ModuleType>>;
 
-    public constructor(windowPath:string, bridgeScriptPath:string, moduleMap:Dictionary<Class<Module<ModuleType>>>) {
+    public constructor(windowPath:string, bridgeScriptPath:string, moduleMap:Dictionary<Class<Module<ModuleType>>>, allowMultipleInstances:boolean = false) {
         this._windowManager = new WindowManager<ModuleType>(this, windowPath, bridgeScriptPath);
         this._moduleMap = {};
 
@@ -28,23 +28,26 @@ export class Application<ModuleType extends number> {
 
         //-----------------------------------
 
-        if (Electron.app.requestSingleInstanceLock()) {
+        if (allowMultipleInstances || Electron.app.requestSingleInstanceLock()) {
             Electron.app.allowRendererProcessReuse = true;
             Electron.app.applicationMenu = null;
 
             //-----------------------------------
 
             Electron.protocol.registerSchemesAsPrivileged([
-                {
-                    privileges: { standard: true },
-                    scheme: 'file'
-                }
+                { privileges: { standard: true }, scheme: 'file' }
             ]);
 
             //-----------------------------------
 
-            this.attachIpcListeners();
-            this.attachAppListeners();
+            Electron.app.on('second-instance', this.appSecondInstanceHandler);
+            Electron.app.on('window-all-closed', this.appAllWindowsClosedHandler);
+            Electron.app.on('ready', this.appReadyHandler);
+
+            Electron.ipcMain.handle(
+                BridgeRequestType.PROCESS_MODULE_REQUEST,
+                this.appModuleRequestHandler
+            );
 
             return;
         }
@@ -94,8 +97,8 @@ export class Application<ModuleType extends number> {
         return this._moduleMap[moduleType].state;
     }
 
-    private prepareWindowOptions(options:WindowInitOptions<ModuleType>):WindowOptions<ModuleType> {
-        options = (typeof(options) === 'number') ? { moduleType: options } : options;
+    protected prepareWindowOptions(options:WindowInitOptions<ModuleType>):WindowOptions<ModuleType> {
+        options = (typeof (options) === 'number') ? { moduleType: options } : options;
 
         return {
             ...this._moduleMap[options.moduleType].windowOptions,
@@ -103,36 +106,29 @@ export class Application<ModuleType extends number> {
         };
     }
 
-    private attachIpcListeners():void {
-        Electron.ipcMain.handle(
-            BridgeRequestType.PROCESS_MODULE_REQUEST,
-            async (event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> => {
-                const module = this._moduleMap[moduleType];
+    protected appModuleRequestHandler = async (event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> => {
+        const module = this._moduleMap[moduleType];
 
-                if (module != null) {
-                    return await module.process(event.sender, action, ...content);
-                }
+        if (module != null) {
+            return await module.process(event.sender, action, ...content);
+        }
 
-                return null;
-            }
-        );
-    }
+        return null;
+    };
 
-    private attachAppListeners():void {
-        Electron.app.on('second-instance', () => {
-            if (this._windowManager.parent != null) {
-                this._windowManager.parent.restore();
-            }
-        });
+    protected appSecondInstanceHandler = ():void => {
+        if (this._windowManager.parent != null) {
+            this._windowManager.parent.restore();
+        }
+    };
 
-        Electron.app.on('window-all-closed', () => {
-            if (process.platform !== 'darwin') {
-                Electron.app.quit();
-            }
-        });
+    protected appAllWindowsClosedHandler = ():void => {
+        if (process.platform !== 'darwin') {
+            Electron.app.quit();
+        }
+    };
 
-        Electron.app.on('ready', () => {
-            // empty..
-        });
-    }
+    protected appReadyHandler = ():void => {
+        // empty..
+    };
 }
