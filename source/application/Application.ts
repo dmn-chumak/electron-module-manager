@@ -40,13 +40,13 @@ export class Application<ModuleType extends number> {
 
             //-----------------------------------
 
-            Electron.app.on('second-instance', this.appSecondInstanceHandler);
-            Electron.app.on('window-all-closed', this.appAllWindowsClosedHandler);
-            Electron.app.on('ready', this.appReadyHandler);
+            Electron.app.on('second-instance', this.appSecondInstanceHandler.bind(this));
+            Electron.app.on('window-all-closed', this.appAllWindowsClosedHandler.bind(this));
+            Electron.app.on('ready', this.appReadyHandler.bind(this));
 
             Electron.ipcMain.handle(
                 BridgeRequestType.PROCESS_MODULE_REQUEST,
-                this.appModuleRequestHandler
+                this.appModuleRequestHandler.bind(this)
             );
 
             return;
@@ -106,7 +106,7 @@ export class Application<ModuleType extends number> {
         };
     }
 
-    protected appModuleRequestHandler = async (event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> => {
+    protected async appModuleRequestHandler(event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> {
         const module = this._moduleMap[moduleType];
 
         if (module != null) {
@@ -114,23 +114,23 @@ export class Application<ModuleType extends number> {
         }
 
         return null;
-    };
+    }
 
-    protected appSecondInstanceHandler = ():void => {
+    protected appSecondInstanceHandler():void {
         if (this._windowManager.parent != null) {
             this._windowManager.parent.restore();
         }
-    };
+    }
 
-    protected appAllWindowsClosedHandler = ():void => {
+    protected appAllWindowsClosedHandler():void {
         if (process.platform !== 'darwin') {
             Electron.app.quit();
         }
-    };
+    }
 
-    protected appReadyHandler = ():void => {
+    protected appReadyHandler():void {
         // empty..
-    };
+    }
 
     public get windowManager():WindowManager<ModuleType> {
         return this._windowManager;
