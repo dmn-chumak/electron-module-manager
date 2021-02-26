@@ -4,7 +4,7 @@ A simple example of electron-module-manager usage.
 
 ## Installation
 
-- Install all packaged/dependencies:
+- Install all packages/dependencies:
 
 ```bash
 npm install

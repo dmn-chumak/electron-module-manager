@@ -1,6 +1,9 @@
 # Electron Module Manager
 
-A simple implementation of windows/modules management for React-based Electron application.
+A simple implementation of windows/modules management system for React-based Electron application.
+Allows you to set up simple and secure communication between **main** and **renderer** processes, using separate context and state for each window.
+
+Easy to set up, update and maintain 😊.
 
 ## Installation
 
@@ -39,25 +42,15 @@ export interface CounterModuleContext {
 
 ```typescript
 export class CounterModule extends Module<ModuleType, CounterModuleState> implements CounterModuleContext {
-    public constructor() {
-        super(ModuleType.COUNTER);
-
-        // setting up initial module state
-
-        this._state = {
-            counter: 0
-        };
-    }
-
     public async increaseValue():Promise<void> {
         // updating module state and notifying module view
 
         this._application.updateState(
-            this._moduleType, { counter: this._state.counter + 1 }, true
+            this._window.moduleType, { counter: this._state.counter + 1 }, true
         );
     }
 
-    public get windowOptions():Partial<WindowOptions<ModuleType>> {
+    public static createWindowOptions():Partial<WindowBaseOptions> {
         // providing initial state for window view
 
         return {
@@ -82,6 +75,7 @@ export class CounterModuleView extends ModuleView<ModuleType, CounterModuleState
 
     public componentDidMount() {
         setInterval(this.increaseCounterValue, 1000);
+        super.componentDidMount();
     }
 
     public render():React.ReactNode {
@@ -107,8 +101,11 @@ const application = new Application(
 );
 
 Electron.app.on('ready', async () => {
-    await application.createWindowParent(
-        ModuleType.COUNTER
+    await application.createWindowParent<CounterModuleState>(
+        ModuleType.COUNTER, {
+            // setting up initial module state
+            counter: 0
+        }
     );
 });
 ```
