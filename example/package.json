@@ -1,7 +1,7 @@
 {
     "name": "electron-module-manager-example",
     "description": "A simple example of electron-module-manager usage",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "homepage": "https://github.com/dmn-chumak/electron-module-manager",
     "main": "./output/application.js",
     "author": "dmn-chumak",
@@ -21,7 +21,7 @@
     },
     "dependencies": {
         "electron": "^11.3.0",
-        "electron-module-manager": "^1.2.1",
+        "electron-module-manager": "^1.2.2",
         "react": "^17.0.1",
         "react-dom": "^17.0.1"
     }

@@ -1,5 +1,5 @@
 import * as Electron from 'electron';
-import { Application } from 'electron-module-manager/output/Application';
+import { Application } from 'electron-module-manager';
 import * as Path from 'path';
 import { CounterModule } from './modules/counter_dialog/CounterModule';
 import { ModuleType } from './modules/ModuleType';

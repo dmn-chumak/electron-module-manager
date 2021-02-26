@@ -1,5 +1,5 @@
-import { Module } from 'electron-module-manager/output/Module';
-import { WindowBaseOptions } from 'electron-module-manager/output/WindowBaseOptions';
+import { Module } from 'electron-module-manager';
+import { WindowBaseOptions } from 'electron-module-manager';
 import { ModuleType } from '../ModuleType';
 import { WorkspaceModuleState } from '../workspace/WorkspaceModuleState';
 import { CounterModuleContext } from './CounterModuleContext';

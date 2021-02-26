@@ -1,4 +1,4 @@
-import { ModuleView } from 'electron-module-manager/output/ModuleView';
+import { ModuleView } from 'electron-module-manager/output/application/ModuleView';
 import * as React from 'react';
 import { ModuleType } from '../ModuleType';
 import { CounterModuleContext } from './CounterModuleContext';
