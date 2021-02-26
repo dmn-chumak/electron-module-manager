@@ -1,23 +1,12 @@
-export interface WindowOptions<ModuleType> {
+import { ModuleView } from './ModuleView';
+import { Class } from './typedefs/Class';
+import { Dictionary } from './typedefs/Dictionary';
+import { WindowBaseOptions } from './WindowBaseOptions';
+import { WindowState } from './WindowState';
+
+export interface WindowOptions<ModuleType extends number, ModuleState = any> extends WindowBaseOptions {
+    moduleViewMap?:Dictionary<Class<ModuleView<ModuleType>>>;
+    moduleInitialState?:Readonly<ModuleState>;
     moduleType:ModuleType;
-    moduleViewMap?:any;
-    moduleInitialState?:any;
-    moduleTitle?:string;
-    moduleIcon?:string;
-
-    forceDevTools?:boolean;
-    allowMultipleInstances?:boolean;
-    bridgePath?:string;
-    attachParent?:boolean;
-
-    windowInitialState?:any;
-    isCentered?:boolean;
-    isMinimizable?:boolean;
-    isResizable?:boolean;
-    isModal?:boolean;
-
-    minWidth?:number;
-    minHeight?:number;
-    width?:number;
-    height?:number;
+    initialState?:Readonly<WindowState>;
 }

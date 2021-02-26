@@ -1,27 +1,33 @@
+import * as Electron from 'electron';
 import { Application } from './Application';
 import { Vector } from './typedefs/Vector';
-import { WindowOptions } from './WindowOptions';
+import { Window } from './Window';
+import { WindowBaseOptions } from './WindowBaseOptions';
 
 export abstract class Module<ModuleType extends number, ModuleState = any> {
     protected static readonly FORBIDDEN_METHODS_LIST:Vector<string> = [
-        'initialize', 'process', 'resetAndUpdateState', 'updateState', 'constructor'
+        'constructor', 'compose', 'process', 'dispose', 'updateState'
     ];
 
-    protected readonly _moduleType:ModuleType;
-    protected _application:Application<ModuleType>;
+    protected readonly _window:Window<ModuleType, ModuleState>;
+    protected readonly _application:Application<ModuleType>;
     protected _state:ModuleState;
 
-    public constructor(moduleType:ModuleType) {
-        this._moduleType = moduleType;
-        this._application = null;
-        this._state = null;
-    }
-
-    public initialize(application:Application<ModuleType>):void {
+    public constructor(application:Application<ModuleType>, window:Window<ModuleType, ModuleState>, state:Readonly<ModuleState> = null) {
+        this._window = window;
         this._application = application;
+        this._state = { ...state };
     }
 
-    public async process(sender:any /* Electron.WebContents */, action:string, ...content:Vector<any>):Promise<any> {
+    public static createWindowOptions():Partial<WindowBaseOptions> {
+        return null;
+    }
+
+    public async compose():Promise<void> {
+        // empty..
+    }
+
+    public async process(sender:Electron.WebContents, action:string, ...content:Vector<any>):Promise<any> {
         const handler = this as any;
 
         //-----------------------------------
@@ -35,20 +41,12 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
         return null;
     }
 
-    public updateState(state:Partial<ModuleState>):ModuleState {
+    public async dispose():Promise<void> {
+        // empty..
+    }
+
+    public updateState(state:Partial<ModuleState>):Readonly<ModuleState> {
         return this._state = { ...this._state, ...state };
-    }
-
-    public resetAndUpdateState(state:Partial<ModuleState>):ModuleState {
-        return this._state = { ...this._state, ...state };
-    }
-
-    public get moduleType():Readonly<ModuleType> {
-        return this._moduleType;
-    }
-
-    public get windowOptions():Partial<WindowOptions<ModuleType>> {
-        return {};
     }
 
     public get state():Readonly<ModuleState> {

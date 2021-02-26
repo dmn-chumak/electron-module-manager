@@ -6,26 +6,31 @@ import { Class } from './typedefs/Class';
 import { WindowOptions } from './WindowOptions';
 import { WindowState } from './WindowState';
 
-export class WindowView<ModuleType> extends React.Component<WindowOptions<ModuleType>, WindowState> {
-    protected readonly _moduleViewRef:React.RefObject<ModuleView<ModuleType>>;
+export class WindowView<ModuleType extends number, ModuleState = any> extends React.Component<WindowOptions<ModuleType, ModuleState>, WindowState> {
+    protected readonly _moduleViewRef:React.RefObject<ModuleView<ModuleType, ModuleState>>;
 
-    public constructor(props:WindowOptions<ModuleType>) {
+    public constructor(props:WindowOptions<ModuleType, ModuleState>) {
         super(props);
 
         this._moduleViewRef = React.createRef();
         this.state = {
-            ...props.windowInitialState
+            ...props.initialState
         };
-
-        BridgeWrapper.context.handle(
-            BridgeRequestType.UPDATE_WINDOW_STATE,
-            (state:WindowState):void => {
-                this.setState(state);
-            }
-        );
     }
 
-    public createModuleElement(moduleView:Class<ModuleView<ModuleType>>):React.ReactNode {
+    private windowStateUpdateHandler = (state:Readonly<WindowState>):void => {
+        this.setState(state);
+    };
+
+    public componentDidMount():void {
+        BridgeWrapper.context.appendHandler(BridgeRequestType.UPDATE_WINDOW_STATE, this.windowStateUpdateHandler);
+    }
+
+    public componentWillUnmount():void {
+        BridgeWrapper.context.removeHandler(BridgeRequestType.UPDATE_WINDOW_STATE, this.windowStateUpdateHandler);
+    }
+
+    public createModuleElement(moduleView:Class<ModuleView<ModuleType, ModuleState>>):React.ReactNode {
         return React.createElement(
             moduleView, {
                 moduleType: this.props.moduleType,

@@ -1,20 +1,40 @@
+import * as Electron from 'electron';
 import { BridgeContext } from './BridgeContext';
+import { BridgeEventHandler } from './BridgeEventHandler';
 import { BridgeRequestType } from './BridgeRequestType';
-import { Electron } from './ElectronResolver';
 import { Vector } from './typedefs/Vector';
 
 export const DEFAULT_BRIDGE_CONTEXT:BridgeContext = {
-    handle: async (requestType:BridgeRequestType, handler:(content:any) => void):Promise<void> => {
+    async appendHandler<ContentType>(requestType:string | BridgeRequestType, handler:BridgeEventHandler<ContentType>):Promise<void> {
         Electron.ipcRenderer.on(
-            requestType, (event:any /* Electron.IpcRendererEvent */, content:any) => {
+            requestType, handler.nativeFunc = (event:Electron.IpcRendererEvent, content:any) => {
                 handler(content);
             }
         );
     },
-    invoke: async (moduleType:any, action:string, ...content:Vector<any>):Promise<any> => {
+
+    async appendHandlerOnce<ContentType>(requestType:string | BridgeRequestType, handler:BridgeEventHandler<ContentType>):Promise<void> {
+        Electron.ipcRenderer.once(
+            requestType, handler.nativeFunc = (event:Electron.IpcRendererEvent, content:any) => {
+                handler(content);
+            }
+        );
+    },
+
+    async removeHandler<ContentType>(requestType:string | BridgeRequestType, handler:BridgeEventHandler<ContentType>):Promise<void> {
+        if (handler == null) {
+            Electron.ipcRenderer.removeAllListeners(requestType);
+        } else {
+            Electron.ipcRenderer.removeListener(
+                requestType, handler.nativeFunc
+            );
+        }
+    },
+
+    async invoke<ModuleType>(action:string, ...content:Vector<any>):Promise<any> {
         return await Electron.ipcRenderer.invoke(
             BridgeRequestType.PROCESS_MODULE_REQUEST,
-            moduleType, action, ...content
+            action, ...content
         );
     }
 };

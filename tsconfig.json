@@ -20,6 +20,7 @@
         "source"
     ],
     "exclude": [
+        "example",
         "node_modules",
         "output"
     ]

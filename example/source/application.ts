@@ -1,9 +1,10 @@
 import * as Electron from 'electron';
-import { Application } from 'electron-module-manager';
+import { Application } from 'electron-module-manager/output/Application';
 import * as Path from 'path';
 import { CounterModule } from './modules/counter_dialog/CounterModule';
 import { ModuleType } from './modules/ModuleType';
 import { WorkspaceModule } from './modules/workspace/WorkspaceModule';
+import { WorkspaceModuleState } from './modules/workspace/WorkspaceModuleState';
 
 //-----------------------------------
 
@@ -19,7 +20,9 @@ const application = new Application(
 //-----------------------------------
 
 Electron.app.on('ready', async () => {
-    await application.createWindowParent(
-        ModuleType.WORKSPACE
+    await application.createWindowParent<WorkspaceModuleState>(
+        ModuleType.WORKSPACE, {
+            counter: 0
+        }
     );
 });

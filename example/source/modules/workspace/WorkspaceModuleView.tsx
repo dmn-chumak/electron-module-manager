@@ -1,4 +1,4 @@
-import { ModuleView } from 'electron-module-manager';
+import { ModuleView } from 'electron-module-manager/output/ModuleView';
 import * as React from 'react';
 import { ModuleType } from '../ModuleType';
 import { WorkspaceModuleContext } from './WorkspaceModuleContext';

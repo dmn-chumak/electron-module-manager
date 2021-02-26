@@ -1,76 +1,45 @@
+import * as Electron from 'electron';
 import { Application } from './Application';
 import { BridgeRequestType } from './BridgeRequestType';
-import { Electron } from './ElectronResolver';
+import { Module } from './Module';
+import { Class } from './typedefs/Class';
+import { WindowBaseOptions } from './WindowBaseOptions';
 import { WindowOptions } from './WindowOptions';
 import { WindowState } from './WindowState';
 
-export class Window<ModuleType extends number> {
+export class Window<ModuleType extends number, ModuleState = any> {
+    protected readonly _module:Module<ModuleType, ModuleState>;
+
+    protected readonly _nativeWindow:Electron.BrowserWindow;
     protected readonly _moduleType:ModuleType;
-    protected readonly _nativeWindow:any /* Electron.BrowserWindow */;
-    protected readonly _windowOptions:WindowOptions<ModuleType>;
-    protected readonly _application:Application<ModuleType>;
+    protected readonly _windowOptions:WindowBaseOptions;
 
     protected _isActive:boolean;
 
-    public constructor(application:Application<ModuleType>, options:WindowOptions<ModuleType>, parent:Window<ModuleType> = null) {
-        this._application = application;
-        this._moduleType = options.moduleType;
+    public constructor(application:Application<ModuleType>, windowOptions:WindowBaseOptions, moduleType:ModuleType, moduleClass:Class<Module<ModuleType, ModuleState>>, moduleState:Readonly<ModuleState> = null, parent:Window<ModuleType> = null) {
+        if (moduleClass != null) {
+            this._module = new moduleClass(application, this, moduleState);
+        }
+
+        //-----------------------------------
+
+        this._nativeWindow = new Electron.BrowserWindow(this.createBrowserWindowOptions(windowOptions, parent));
+        this._nativeWindow.on('closed', this.nativeWindowCloseHandler);
+        this._nativeWindow.on('unmaximize', this.nativeWindowRestoreHandler);
+        this._nativeWindow.on('maximize', this.nativeWindowMaximizeHandler);
+        this._nativeWindow.webContents.on('did-finish-load', this.nativeWindowLoadedHandler);
+        this._nativeWindow.on('focus', this.nativeWindowFocusHandler);
+        this._nativeWindow.on('blur', this.nativeWindowBlurHandler);
+
+        //-----------------------------------
+
+        this._windowOptions = windowOptions;
         this._isActive = false;
-
-        //-----------------------------------
-
-        this._nativeWindow = new Electron.BrowserWindow(
-            this.createBrowserWindowOptions(options, parent)
-        );
-
-        //-----------------------------------
-
-        this._nativeWindow.on('closed', this.windowCloseHandler);
-        this._nativeWindow.on('unmaximize', this.windowRestoreHandler);
-        this._nativeWindow.on('maximize', this.windowMaximizeHandler);
-        this._nativeWindow.webContents.on('did-finish-load', this.windowLoadedHandler);
-        this._nativeWindow.on('focus', this.windowFocusHandler);
-        this._nativeWindow.on('blur', this.windowBlurHandler);
-
-        //-----------------------------------
-
-        this._windowOptions = options;
+        this._moduleType = moduleType;
     }
 
-    protected windowRestoreHandler = ():void => {
-        this.updateWindowState({ isMaximized: false });
-    };
-
-    protected windowMaximizeHandler = ():void => {
-        this.updateWindowState({ isMaximized: true });
-    };
-
-    protected windowFocusHandler = ():void => {
-        this.updateWindowState({ isBlurred: false });
-    };
-
-    protected windowBlurHandler = ():void => {
-        this.updateWindowState({ isBlurred: true });
-    };
-
-    protected windowLoadedHandler = ():void => {
-        this._nativeWindow.webContents.send(
-            BridgeRequestType.INITIALIZE_WINDOW_STATE, {
-                moduleInitialState: this._application.obtainState(this._moduleType),
-                ...this._windowOptions,
-                windowInitialState: {
-                    isMaximized: this._nativeWindow.isMaximized(),
-                    isBlurred: !this._nativeWindow.isFocused()
-                }
-            }
-        );
-    };
-
-    protected windowCloseHandler = ():void => {
-        this._isActive = false;
-    };
-
-    public async initialize(windowPath:string):Promise<void> {
+    public async compose(windowPath:string):Promise<void> {
+        await this._module.compose();
         await this._nativeWindow.loadFile(windowPath);
 
         //-----------------------------------
@@ -90,7 +59,7 @@ export class Window<ModuleType extends number> {
         }
     }
 
-    protected createBrowserWindowOptions(options:WindowOptions<ModuleType>, parent:Window<ModuleType>):any {
+    protected createBrowserWindowOptions(options:WindowBaseOptions, parent:Window<ModuleType> = null):Electron.BrowserWindowConstructorOptions {
         return {
             webPreferences: {
                 defaultEncoding: 'utf-8',
@@ -119,7 +88,47 @@ export class Window<ModuleType extends number> {
         };
     }
 
-    public updateWindowState(state:WindowState):void {
+    protected createWindowOptions():WindowOptions<ModuleType, ModuleState> {
+        return {
+            ...this._windowOptions,
+            moduleType: this._moduleType,
+            moduleInitialState: (this._module != null ? this._module.state : null),
+            initialState: {
+                isMaximized: this._nativeWindow.isMaximized(),
+                isBlurred: !this._nativeWindow.isFocused()
+            }
+        };
+    }
+
+    private nativeWindowLoadedHandler = ():void => {
+        this._nativeWindow.webContents.send(
+            BridgeRequestType.INITIALIZE_WINDOW_STATE,
+            this.createWindowOptions()
+        );
+    };
+
+    private nativeWindowCloseHandler = async ():Promise<void> => {
+        await this._module.dispose();
+        this._isActive = false;
+    };
+
+    private nativeWindowRestoreHandler = ():void => {
+        this.updateWindowState({ isMaximized: false });
+    };
+
+    private nativeWindowMaximizeHandler = ():void => {
+        this.updateWindowState({ isMaximized: true });
+    };
+
+    private nativeWindowFocusHandler = ():void => {
+        this.updateWindowState({ isBlurred: false });
+    };
+
+    private nativeWindowBlurHandler = ():void => {
+        this.updateWindowState({ isBlurred: true });
+    };
+
+    public updateWindowState(state:Partial<WindowState>):void {
         if (this._isActive) {
             this._nativeWindow.webContents.send(
                 BridgeRequestType.UPDATE_WINDOW_STATE,
@@ -128,12 +137,16 @@ export class Window<ModuleType extends number> {
         }
     }
 
-    public updateModuleState<ModuleState>(state:ModuleState):void {
+    public updateModuleState(state:Partial<ModuleState>, notifyView:boolean = false):void {
         if (this._isActive) {
-            this._nativeWindow.webContents.send(
-                BridgeRequestType.UPDATE_MODULE_STATE,
-                state
-            );
+            const fullState = this._module.updateState(state);
+
+            if (notifyView) {
+                this._nativeWindow.webContents.send(
+                    BridgeRequestType.UPDATE_MODULE_STATE,
+                    fullState
+                );
+            }
         }
     }
 
@@ -168,15 +181,15 @@ export class Window<ModuleType extends number> {
         }
     }
 
-    public get moduleType():ModuleType {
-        return this._moduleType;
+    public get module():Module<ModuleType, ModuleState> {
+        return this._module;
     }
 
-    public get nativeWindow():any /* Electron.BrowserWindow */ {
+    public get nativeWindow():Electron.BrowserWindow {
         return this._nativeWindow;
     }
 
-    public get isActive():boolean {
-        return this._isActive;
+    public get moduleType():ModuleType {
+        return this._moduleType;
     }
 }

@@ -1,30 +1,18 @@
+import * as Electron from 'electron';
 import { BridgeRequestType } from './BridgeRequestType';
-import { Electron } from './ElectronResolver';
-import { Module } from './Module';
+import { ModuleClass } from './ModuleClass';
 import { Class } from './typedefs/Class';
 import { Dictionary } from './typedefs/Dictionary';
 import { Vector } from './typedefs/Vector';
 import { Window } from './Window';
-import { WindowInitOptions } from './WindowInitOptions';
+import { WindowBaseOptions } from './WindowBaseOptions';
 import { WindowManager } from './WindowManager';
-import { WindowOptions } from './WindowOptions';
 
 export class Application<ModuleType extends number> {
     protected readonly _windowManager:WindowManager<ModuleType>;
-    protected readonly _moduleMap:Dictionary<Module<ModuleType>>;
 
-    public constructor(windowPath:string, bridgeScriptPath:string, moduleMap:Dictionary<Class<Module<ModuleType>>>, allowMultipleInstances:boolean = false) {
-        this._windowManager = new WindowManager<ModuleType>(this, windowPath, bridgeScriptPath);
-        this._moduleMap = {};
-
-        //-----------------------------------
-
-        for (const moduleType in moduleMap) {
-            if (moduleMap.hasOwnProperty(moduleType)) {
-                this._moduleMap[moduleType] = new moduleMap[moduleType]();
-                this._moduleMap[moduleType].initialize(this);
-            }
-        }
+    public constructor(windowPath:string, bridgeScriptPath:string, moduleClassesMap:Dictionary<ModuleClass<ModuleType>> = null, allowMultipleInstances:boolean = false) {
+        this._windowManager = new WindowManager<ModuleType>(this, windowPath, bridgeScriptPath, moduleClassesMap);
 
         //-----------------------------------
 
@@ -57,60 +45,39 @@ export class Application<ModuleType extends number> {
         Electron.app.quit();
     }
 
-    public async createWindowWithType(windowType:Class<Window<ModuleType>>, options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
-        return await this._windowManager.create(windowType, this.prepareWindowOptions(options));
+    public async createWindowWithType<ModuleState>(windowType:Class<Window<ModuleType, ModuleState>>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
+        return await this._windowManager.create(windowType, windowOptions, moduleType, moduleState);
     }
 
-    public async createWindow(options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
-        return await this.createWindowWithType(Window, options);
+    public async createWindow<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
+        return await this.createWindowWithType(Window, moduleType, moduleState, windowOptions);
     }
 
-    public async createWindowParentWithType(windowType:Class<Window<ModuleType>>, options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
-        return await this._windowManager.createParent(windowType, this.prepareWindowOptions(options));
+    public async createWindowParentWithType<ModuleState>(windowType:Class<Window<ModuleType, ModuleState>>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
+        return await this._windowManager.createParent(windowType, windowOptions, moduleType, moduleState);
     }
 
-    public async createWindowParent(options:WindowInitOptions<ModuleType>):Promise<Window<ModuleType>> {
-        return await this.createWindowParentWithType(Window, options);
+    public async createWindowParent<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
+        return await this.createWindowParentWithType(Window, moduleType, moduleState, windowOptions);
+    }
+
+    public updateModuleState<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState>, notifyView:boolean = false):void {
+        this._windowManager.updateState(moduleType, moduleState, notifyView);
     }
 
     public closeWindow(moduleType:ModuleType):void {
         this._windowManager.close(moduleType);
     }
 
-    public updateState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = false):void {
-        const fullState = this._moduleMap[moduleType].updateState(state);
-
-        if (notifyView) {
-            this._windowManager.updateState(moduleType, fullState);
-        }
+    public obtainModuleState<ModuleState>(moduleType:ModuleType):ModuleState {
+        return this._windowManager.obtainState(moduleType);
     }
 
-    public resetAndUpdateState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = false):void {
-        const fullState = this._moduleMap[moduleType].resetAndUpdateState(state);
-
-        if (notifyView) {
-            this._windowManager.updateState(moduleType, fullState);
-        }
-    }
-
-    public obtainState<ModuleState>(moduleType:ModuleType):Readonly<ModuleState> {
-        return this._moduleMap[moduleType].state;
-    }
-
-    protected prepareWindowOptions(options:WindowInitOptions<ModuleType>):WindowOptions<ModuleType> {
-        options = (typeof (options) === 'number') ? { moduleType: options } : options;
-
-        return {
-            ...this._moduleMap[options.moduleType].windowOptions,
-            ...options
-        };
-    }
-
-    protected async appModuleRequestHandler(event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> {
-        const module = this._moduleMap[moduleType];
-
-        if (module != null) {
-            return await module.process(event.sender, action, ...content);
+    protected async appModuleRequestHandler(event:Electron.IpcMainInvokeEvent, action:string, ...content:Vector<any>):Promise<any> {
+        for (const window of this._windowManager.windowList) {
+            if (window.nativeWindow.webContents === event.sender && window.module != null) {
+                return await window.module.process(event.sender, action, ...content);
+            }
         }
 
         return null;

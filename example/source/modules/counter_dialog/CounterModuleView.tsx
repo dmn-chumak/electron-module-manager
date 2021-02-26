@@ -1,4 +1,4 @@
-import { ModuleView } from 'electron-module-manager';
+import { ModuleView } from 'electron-module-manager/output/ModuleView';
 import * as React from 'react';
 import { ModuleType } from '../ModuleType';
 import { CounterModuleContext } from './CounterModuleContext';
@@ -15,6 +15,7 @@ export class CounterModuleView extends ModuleView<ModuleType, CounterModuleState
 
     public componentDidMount() {
         setInterval(this.increaseCounterValue, 1000);
+        super.componentDidMount();
     }
 
     public render():React.ReactNode {
