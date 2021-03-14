@@ -22,7 +22,7 @@ export const DEFAULT_BRIDGE_CONTEXT:BridgeContext = {
     },
 
     async removeHandler<ContentType>(requestType:string | BridgeRequestType, handler:BridgeEventHandler<ContentType>):Promise<void> {
-        if (handler == null) {
+        if (handler == null || handler.nativeFunc == null) {
             Electron.ipcRenderer.removeAllListeners(requestType);
         } else {
             Electron.ipcRenderer.removeListener(
