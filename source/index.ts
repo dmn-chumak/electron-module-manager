@@ -14,6 +14,7 @@ export * from './application/Module';
 export * from './application/ModuleOptions';
 export * from './application/ModuleClass';
 export * from './application/ModuleView';
+export * from './application/SubModuleView';
 export * from './application/Window';
 export * from './application/WindowBaseOptions';
 export * from './application/WindowManager';
