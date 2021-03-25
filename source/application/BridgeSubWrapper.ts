@@ -23,7 +23,7 @@ export class BridgeSubWrapper<ModuleType extends number> implements ProxyHandler
     public get(target:any, action:string):any {
         return async (...content:Vector<any>):Promise<any> => {
             return await this._bridgeContext.invoke(
-                this._invokeRequestType, action, ...content
+                this._invokeRequestType, this._moduleType, action, ...content
             );
         };
     }
