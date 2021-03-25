@@ -1,6 +1,7 @@
 import { BridgeRequestType } from './BridgeRequestType';
 import { Electron } from './ElectronResolver';
 import { ModuleClass } from './ModuleClass';
+import { ModuleOptions } from './ModuleOptions';
 import { Class } from './typedefs/Class';
 import { Dictionary } from './typedefs/Dictionary';
 import { Vector } from './typedefs/Vector';
@@ -90,7 +91,7 @@ export class Application<ModuleType extends number> {
         return null;
     }
 
-    protected async appCreateSubModuleHandler(event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, moduleState:any = null):Promise<any> {
+    protected async appCreateSubModuleHandler(event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, moduleState:any = null):Promise<ModuleOptions<ModuleType>> {
         const window = this._windowManager.searchByWebContents(event.sender);
 
         if (window != null) {
@@ -100,7 +101,10 @@ export class Application<ModuleType extends number> {
             window.submodulesList[moduleType] = module;
             await module.compose();
 
-            return module.state;
+            return {
+                initialState: module.state,
+                moduleType
+            };
         }
 
         return null;

@@ -23,8 +23,8 @@ export class BridgeWrapper implements ProxyHandler<any> {
         return await BridgeWrapper.context.invoke(BridgeRequestType.CREATE_SUB_MODULE, moduleType, moduleState);
     }
 
-    public static async removeSubModule<ModuleType extends number, ModuleState = any>(moduleType:ModuleType):Promise<ModuleOptions<ModuleType, ModuleState>> {
-        return await BridgeWrapper.context.invoke(BridgeRequestType.REMOVE_SUB_MODULE, moduleType);
+    public static async removeSubModule<ModuleType extends number, ModuleState = any>(moduleType:ModuleType):Promise<void> {
+        await BridgeWrapper.context.invoke(BridgeRequestType.REMOVE_SUB_MODULE, moduleType);
     }
 
     public get(target:any, action:string):any {
