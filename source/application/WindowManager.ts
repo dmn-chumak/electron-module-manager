@@ -32,7 +32,11 @@ export class WindowManager<ModuleType extends number> {
         const moduleClass = this._moduleClassesMap[moduleType];
 
         if (moduleClass != null) {
-            windowOptions = { ...moduleClass.createWindowOptions(), ...windowOptions };
+            windowOptions = {
+                ...this._application.windowOptions,
+                ...moduleClass.createWindowOptions(),
+                ...windowOptions
+            };
         }
 
         if (windowOptions.allowMultipleInstances !== true) {
@@ -78,7 +82,7 @@ export class WindowManager<ModuleType extends number> {
         return window;
     }
 
-    private nativeWindowCloseHandler = (event:Electron.Event & { sender:Electron.BrowserWindow }):void => {
+    private nativeWindowCloseHandler = (event:any /* Electron.Event & { sender:Electron.BrowserWindow } */):void => {
         for (let index = 0; index < this._windowList.length; index++) {
             const window = this._windowList[index];
 

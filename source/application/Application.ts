@@ -1,5 +1,5 @@
-import * as Electron from 'electron';
 import { BridgeRequestType } from './BridgeRequestType';
+import { Electron } from './ElectronResolver';
 import { ModuleClass } from './ModuleClass';
 import { Class } from './typedefs/Class';
 import { Dictionary } from './typedefs/Dictionary';
@@ -73,7 +73,7 @@ export class Application<ModuleType extends number> {
         return this._windowManager.obtainState(moduleType);
     }
 
-    protected async appModuleRequestHandler(event:Electron.IpcMainInvokeEvent, action:string, ...content:Vector<any>):Promise<any> {
+    protected async appModuleRequestHandler(event:any /* Electron.IpcMainInvokeEvent */, action:string, ...content:Vector<any>):Promise<any> {
         for (const window of this._windowManager.windowList) {
             if (window.nativeWindow.webContents === event.sender && window.module != null) {
                 return await window.module.process(event.sender, action, ...content);
@@ -97,6 +97,10 @@ export class Application<ModuleType extends number> {
 
     protected appReadyHandler():void {
         // empty..
+    }
+
+    public get windowOptions():Partial<WindowBaseOptions> {
+        return null;
     }
 
     public get windowManager():WindowManager<ModuleType> {

@@ -8,5 +8,5 @@ export interface BridgeContext {
 
     removeHandler<ContentType>(requestType:string | BridgeRequestType, handler:(content:ContentType) => void):void;
 
-    invoke(action:string, ...content:Vector<any>):Promise<any>;
+    invoke(requestType:string | BridgeRequestType, action:string, ...content:Vector<any>):Promise<any>;
 }

@@ -1,11 +1,14 @@
 import { BridgeContext } from './BridgeContext';
 import { DEFAULT_BRIDGE_CONTEXT_PATH } from './BridgeContextDefaultPath';
+import { BridgeRequestType } from './BridgeRequestType';
 import { Vector } from './typedefs/Vector';
 
 export class BridgeWrapper implements ProxyHandler<any> {
+    private readonly _invokeRequestType:string | BridgeRequestType;
     private readonly _bridgeContext:BridgeContext;
 
-    public constructor(bridgeContext:BridgeContext) {
+    public constructor(bridgeContext:BridgeContext, invokeRequestType:string | BridgeRequestType = null) {
+        this._invokeRequestType = invokeRequestType || BridgeRequestType.PROCESS_MODULE_REQUEST;
         this._bridgeContext = bridgeContext;
     }
 
@@ -18,7 +21,7 @@ export class BridgeWrapper implements ProxyHandler<any> {
     public get(target:any, action:string):any {
         return async (...content:Vector<any>):Promise<any> => {
             return await this._bridgeContext.invoke(
-                action, ...content
+                this._invokeRequestType, action, ...content
             );
         };
     }

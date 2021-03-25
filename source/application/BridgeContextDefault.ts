@@ -1,13 +1,13 @@
-import * as Electron from 'electron';
 import { BridgeContext } from './BridgeContext';
 import { BridgeEventHandler } from './BridgeEventHandler';
 import { BridgeRequestType } from './BridgeRequestType';
+import { Electron } from './ElectronResolver';
 import { Vector } from './typedefs/Vector';
 
 export const DEFAULT_BRIDGE_CONTEXT:BridgeContext = {
     async appendHandler<ContentType>(requestType:string | BridgeRequestType, handler:BridgeEventHandler<ContentType>):Promise<void> {
         Electron.ipcRenderer.on(
-            requestType, handler.nativeFunc = (event:Electron.IpcRendererEvent, content:any) => {
+            requestType, handler.nativeFunc = (event:any /* Electron.IpcRendererEvent */, content:any) => {
                 handler(content);
             }
         );
@@ -15,7 +15,7 @@ export const DEFAULT_BRIDGE_CONTEXT:BridgeContext = {
 
     async appendHandlerOnce<ContentType>(requestType:string | BridgeRequestType, handler:BridgeEventHandler<ContentType>):Promise<void> {
         Electron.ipcRenderer.once(
-            requestType, handler.nativeFunc = (event:Electron.IpcRendererEvent, content:any) => {
+            requestType, handler.nativeFunc = (event:any /* Electron.IpcRendererEvent */, content:any) => {
                 handler(content);
             }
         );
@@ -31,10 +31,9 @@ export const DEFAULT_BRIDGE_CONTEXT:BridgeContext = {
         }
     },
 
-    async invoke<ModuleType>(action:string, ...content:Vector<any>):Promise<any> {
+    async invoke<ModuleType>(requestType:string | BridgeRequestType, action:string, ...content:Vector<any>):Promise<any> {
         return await Electron.ipcRenderer.invoke(
-            BridgeRequestType.PROCESS_MODULE_REQUEST,
-            action, ...content
+            requestType, action, ...content
         );
     }
 };

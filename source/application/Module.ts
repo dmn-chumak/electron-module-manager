@@ -1,4 +1,3 @@
-import * as Electron from 'electron';
 import { Application } from './Application';
 import { Vector } from './typedefs/Vector';
 import { Window } from './Window';
@@ -27,7 +26,7 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
         // empty..
     }
 
-    public async process(sender:Electron.WebContents, action:string, ...content:Vector<any>):Promise<any> {
+    public async process(sender:any /* Electron.WebContents */, action:string, ...content:Vector<any>):Promise<any> {
         const handler = this as any;
 
         //-----------------------------------

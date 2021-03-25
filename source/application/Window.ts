@@ -1,6 +1,6 @@
-import * as Electron from 'electron';
 import { Application } from './Application';
 import { BridgeRequestType } from './BridgeRequestType';
+import { Electron } from './ElectronResolver';
 import { Module } from './Module';
 import { Class } from './typedefs/Class';
 import { WindowBaseOptions } from './WindowBaseOptions';
@@ -10,7 +10,7 @@ import { WindowState } from './WindowState';
 export class Window<ModuleType extends number, ModuleState = any> {
     protected readonly _module:Module<ModuleType, ModuleState>;
 
-    protected readonly _nativeWindow:Electron.BrowserWindow;
+    protected readonly _nativeWindow:any /* Electron.BrowserWindow */;
     protected readonly _moduleType:ModuleType;
     protected readonly _windowOptions:WindowBaseOptions;
 
@@ -59,7 +59,7 @@ export class Window<ModuleType extends number, ModuleState = any> {
         }
     }
 
-    protected createBrowserWindowOptions(options:WindowBaseOptions, parent:Window<ModuleType> = null):Electron.BrowserWindowConstructorOptions {
+    protected createBrowserWindowOptions(options:WindowBaseOptions, parent:Window<ModuleType> = null):any /* Electron.BrowserWindowConstructorOptions */ {
         return {
             webPreferences: {
                 defaultEncoding: 'utf-8',
@@ -185,7 +185,7 @@ export class Window<ModuleType extends number, ModuleState = any> {
         return this._module;
     }
 
-    public get nativeWindow():Electron.BrowserWindow {
+    public get nativeWindow():any /* Electron.BrowserWindow */ {
         return this._nativeWindow;
     }
 
