@@ -1,14 +1,15 @@
 import { BridgeContext } from './BridgeContext';
 import { DEFAULT_BRIDGE_CONTEXT_PATH } from './BridgeContextDefaultPath';
 import { BridgeRequestType } from './BridgeRequestType';
+import { ModuleOptions } from './ModuleOptions';
 import { Vector } from './typedefs/Vector';
 
 export class BridgeWrapper implements ProxyHandler<any> {
     private readonly _invokeRequestType:string | BridgeRequestType;
     private readonly _bridgeContext:BridgeContext;
 
-    public constructor(bridgeContext:BridgeContext, invokeRequestType:string | BridgeRequestType = null) {
-        this._invokeRequestType = invokeRequestType || BridgeRequestType.PROCESS_MODULE_REQUEST;
+    public constructor(bridgeContext:BridgeContext) {
+        this._invokeRequestType = BridgeRequestType.PROCESS_MODULE_REQUEST;
         this._bridgeContext = bridgeContext;
     }
 
@@ -16,6 +17,14 @@ export class BridgeWrapper implements ProxyHandler<any> {
         return new Proxy(window, new BridgeWrapper(
             bridgeContext || BridgeWrapper.context
         ));
+    }
+
+    public static async createSubModule<ModuleType extends number, ModuleState = any>(moduleType:ModuleType, moduleState:ModuleState = null):Promise<ModuleOptions<ModuleType, ModuleState>> {
+        return await BridgeWrapper.context.invoke(BridgeRequestType.CREATE_SUB_MODULE, moduleType, moduleState);
+    }
+
+    public static async removeSubModule<ModuleType extends number, ModuleState = any>(moduleType:ModuleType):Promise<ModuleOptions<ModuleType, ModuleState>> {
+        return await BridgeWrapper.context.invoke(BridgeRequestType.REMOVE_SUB_MODULE, moduleType);
     }
 
     public get(target:any, action:string):any {

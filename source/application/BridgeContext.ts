@@ -2,11 +2,11 @@ import { BridgeRequestType } from './BridgeRequestType';
 import { Vector } from './typedefs/Vector';
 
 export interface BridgeContext {
-    appendHandler<ContentType>(requestType:string | BridgeRequestType, handler:(content:ContentType) => void):void;
+    appendHandler(requestType:string | BridgeRequestType, handler:(...content:Vector<any>) => void):void;
 
-    appendHandlerOnce<ContentType>(requestType:string | BridgeRequestType, handler:(content:ContentType) => void):void;
+    appendHandlerOnce(requestType:string | BridgeRequestType, handler:(...content:Vector<any>) => void):void;
 
-    removeHandler<ContentType>(requestType:string | BridgeRequestType, handler:(content:ContentType) => void):void;
+    removeHandler(requestType:string | BridgeRequestType, handler:(...content:Vector<any>) => void):void;
 
-    invoke(requestType:string | BridgeRequestType, action:string, ...content:Vector<any>):Promise<any>;
+    invoke(requestType:string | BridgeRequestType, ...content:Vector<any>):Promise<any>;
 }

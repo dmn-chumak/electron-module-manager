@@ -28,14 +28,17 @@ export class Application<ModuleType extends number> {
 
             //-----------------------------------
 
+            Electron.ipcMain.handle(BridgeRequestType.PROCESS_MODULE_REQUEST, this.appModuleRequestHandler.bind(this));
+
+            Electron.ipcMain.handle(BridgeRequestType.CREATE_SUB_MODULE, this.appCreateSubModuleHandler.bind(this));
+            Electron.ipcMain.handle(BridgeRequestType.PROCESS_SUB_MODULE_REQUEST, this.appSubModuleRequestHandler.bind(this));
+            Electron.ipcMain.handle(BridgeRequestType.REMOVE_SUB_MODULE, this.appRemoveSubModuleHandler.bind(this));
+
             Electron.app.on('second-instance', this.appSecondInstanceHandler.bind(this));
             Electron.app.on('window-all-closed', this.appAllWindowsClosedHandler.bind(this));
             Electron.app.on('ready', this.appReadyHandler.bind(this));
 
-            Electron.ipcMain.handle(
-                BridgeRequestType.PROCESS_MODULE_REQUEST,
-                this.appModuleRequestHandler.bind(this)
-            );
+            //-----------------------------------
 
             return;
         }
@@ -61,8 +64,12 @@ export class Application<ModuleType extends number> {
         return await this.createWindowParentWithType(Window, moduleType, moduleState, windowOptions);
     }
 
-    public updateModuleState<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState>, notifyView:boolean = false):void {
+    public updateModuleState<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState>, notifyView:boolean = true):void {
         this._windowManager.updateState(moduleType, moduleState, notifyView);
+    }
+
+    public updateSubModuleState<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState>, notifyView:boolean = true):void {
+        this._windowManager.updateSubState(moduleType, moduleState, notifyView);
     }
 
     public closeWindow(moduleType:ModuleType):void {
@@ -74,13 +81,56 @@ export class Application<ModuleType extends number> {
     }
 
     protected async appModuleRequestHandler(event:any /* Electron.IpcMainInvokeEvent */, action:string, ...content:Vector<any>):Promise<any> {
-        for (const window of this._windowManager.windowList) {
-            if (window.nativeWindow.webContents === event.sender && window.module != null) {
-                return await window.module.process(event.sender, action, ...content);
+        const window = this._windowManager.searchByWebContents(event.sender);
+
+        if (window != null && window.module != null) {
+            return await window.module.process(event.sender, action, ...content);
+        }
+
+        return null;
+    }
+
+    protected async appCreateSubModuleHandler(event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, moduleState:any = null):Promise<any> {
+        const window = this._windowManager.searchByWebContents(event.sender);
+
+        if (window != null) {
+            const moduleClass = this._windowManager.moduleClassesMap[moduleType];
+
+            const module = new moduleClass(this, window, moduleState);
+            window.submodulesList[moduleType] = module;
+            await module.compose();
+
+            return module.state;
+        }
+
+        return null;
+    }
+
+    protected async appSubModuleRequestHandler(event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> {
+        const window = this._windowManager.searchByWebContents(event.sender);
+
+        if (window != null) {
+            const module = window.submodulesList[moduleType];
+
+            if (module != null) {
+                return await module.process(event.sender, action, ...content);
             }
         }
 
         return null;
+    }
+
+    protected async appRemoveSubModuleHandler(event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType):Promise<void> {
+        const window = this._windowManager.searchByWebContents(event.sender);
+
+        if (window != null) {
+            const module = window.submodulesList[moduleType];
+
+            if (module != null) {
+                window.submodulesList[moduleType] = null;
+                await module.dispose();
+            }
+        }
     }
 
     protected appSecondInstanceHandler():void {

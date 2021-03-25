@@ -3,11 +3,13 @@ import { BridgeRequestType } from './BridgeRequestType';
 import { Electron } from './ElectronResolver';
 import { Module } from './Module';
 import { Class } from './typedefs/Class';
+import { Dictionary } from './typedefs/Dictionary';
 import { WindowBaseOptions } from './WindowBaseOptions';
 import { WindowOptions } from './WindowOptions';
 import { WindowState } from './WindowState';
 
 export class Window<ModuleType extends number, ModuleState = any> {
+    protected readonly _submodulesList:Dictionary<Module<ModuleType>>;
     protected readonly _module:Module<ModuleType, ModuleState>;
 
     protected readonly _nativeWindow:any /* Electron.BrowserWindow */;
@@ -33,6 +35,7 @@ export class Window<ModuleType extends number, ModuleState = any> {
 
         //-----------------------------------
 
+        this._submodulesList = {};
         this._windowOptions = windowOptions;
         this._isActive = false;
         this._moduleType = moduleType;
@@ -109,6 +112,15 @@ export class Window<ModuleType extends number, ModuleState = any> {
 
     private nativeWindowCloseHandler = async ():Promise<void> => {
         await this._module.dispose();
+
+        for (const moduleType in this._submodulesList) {
+            const module = this._submodulesList[moduleType];
+
+            if (module != null) {
+                await module.dispose();
+            }
+        }
+
         this._isActive = false;
     };
 
@@ -137,7 +149,24 @@ export class Window<ModuleType extends number, ModuleState = any> {
         }
     }
 
-    public updateModuleState(state:Partial<ModuleState>, notifyView:boolean = false):void {
+    public updateSubModuleState(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = true):void {
+        if (this._isActive) {
+            const module = this._submodulesList[moduleType];
+
+            if (module != null) {
+                const fullState = this._module.updateState(state);
+
+                if (notifyView) {
+                    this._nativeWindow.webContents.send(
+                        BridgeRequestType.UPDATE_SUB_MODULE_STATE,
+                        moduleType, fullState
+                    );
+                }
+            }
+        }
+    }
+
+    public updateModuleState(state:Partial<ModuleState>, notifyView:boolean = true):void {
         if (this._isActive) {
             const fullState = this._module.updateState(state);
 
@@ -179,6 +208,10 @@ export class Window<ModuleType extends number, ModuleState = any> {
 
             this._nativeWindow.focus();
         }
+    }
+
+    public get submodulesList():Dictionary<Module<ModuleType>> {
+        return this._submodulesList;
     }
 
     public get module():Module<ModuleType, ModuleState> {

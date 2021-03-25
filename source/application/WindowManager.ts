@@ -98,11 +98,27 @@ export class WindowManager<ModuleType extends number> {
         }
     };
 
-    public updateState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = false):void {
+    public searchByWebContents(contents:any /* Electron.WebContents */):Window<any> {
+        for (const window of this._windowList) {
+            if (window.nativeWindow.webContents === contents) {
+                return window;
+            }
+        }
+
+        return null;
+    }
+
+    public updateState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = true):void {
         for (const window of this._windowList) {
             if (window.moduleType === moduleType && window.module != null) {
                 window.updateModuleState(state, notifyView);
             }
+        }
+    }
+
+    public updateSubState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = true):void {
+        for (const window of this._windowList) {
+            window.updateSubModuleState(moduleType, state, notifyView);
         }
     }
 
@@ -135,6 +151,10 @@ export class WindowManager<ModuleType extends number> {
 
     public get windowList():Vector<Window<ModuleType>> {
         return this._windowList;
+    }
+
+    public get moduleClassesMap():Dictionary<ModuleClass<ModuleType>> {
+        return this._moduleClassesMap;
     }
 
     public get parent():Window<ModuleType> {
