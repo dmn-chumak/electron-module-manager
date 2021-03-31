@@ -154,7 +154,7 @@ export class Window<ModuleType extends number, ModuleState = any> {
             const module = this._submodulesList[moduleType];
 
             if (module != null) {
-                const fullState = this._module.updateState(state);
+                const fullState = module.updateState(state);
 
                 if (notifyView) {
                     this._nativeWindow.webContents.send(
