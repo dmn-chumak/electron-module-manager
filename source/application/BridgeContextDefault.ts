@@ -5,23 +5,23 @@ import { Electron } from './ElectronResolver';
 import { Vector } from './typedefs/Vector';
 
 export const DEFAULT_BRIDGE_CONTEXT:BridgeContext = {
-    async appendHandler<ContentType>(requestType:string | BridgeRequestType, handler:BridgeEventHandler<ContentType>):Promise<void> {
+    async appendHandler(requestType:string | BridgeRequestType, handler:BridgeEventHandler):Promise<void> {
         Electron.ipcRenderer.on(
-            requestType, handler.nativeFunc = (event:any /* Electron.IpcRendererEvent */, content:any) => {
-                handler(content);
+            requestType, handler.nativeFunc = (event:any /* Electron.IpcRendererEvent */, ...content:Vector<any>) => {
+                handler(...content);
             }
         );
     },
 
-    async appendHandlerOnce<ContentType>(requestType:string | BridgeRequestType, handler:BridgeEventHandler<ContentType>):Promise<void> {
+    async appendHandlerOnce(requestType:string | BridgeRequestType, handler:BridgeEventHandler):Promise<void> {
         Electron.ipcRenderer.once(
-            requestType, handler.nativeFunc = (event:any /* Electron.IpcRendererEvent */, content:any) => {
-                handler(content);
+            requestType, handler.nativeFunc = (event:any /* Electron.IpcRendererEvent */, ...content:Vector<any>) => {
+                handler(...content);
             }
         );
     },
 
-    async removeHandler<ContentType>(requestType:string | BridgeRequestType, handler:BridgeEventHandler<ContentType>):Promise<void> {
+    async removeHandler(requestType:string | BridgeRequestType, handler:BridgeEventHandler):Promise<void> {
         if (handler == null || handler.nativeFunc == null) {
             Electron.ipcRenderer.removeAllListeners(requestType);
         } else {

@@ -1,5 +1,5 @@
 import { Vector } from './typedefs/Vector';
 
-export type BridgeEventHandler<ContentType> = ((content:ContentType) => void) & {
+export type BridgeEventHandler = ((...content:Vector<any>) => void) & {
     nativeFunc?:(...content:Vector<any>) => void;
 };
