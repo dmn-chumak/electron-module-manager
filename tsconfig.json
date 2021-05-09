@@ -6,6 +6,9 @@
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
+        "strictBindCallApply": true,
+        "alwaysStrict": true,
+        "preserveConstEnums": true,
         "allowJs": false,
 
         "moduleResolution": "node",

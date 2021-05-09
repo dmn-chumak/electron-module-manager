@@ -10,11 +10,11 @@ export class CounterModule extends Module<ModuleType, CounterModuleState> implem
         const currentState = this._application.obtainModuleState<WorkspaceModuleState>(ModuleType.WORKSPACE);
         const counter = currentState.counter + 1;
 
-        this._application.updateModuleState(ModuleType.WORKSPACE, { counter }, true);
-        this._application.updateModuleState(ModuleType.COUNTER, { counter }, true);
+        this._application.updateModuleState(ModuleType.WORKSPACE, { counter });
+        this._application.updateModuleState(ModuleType.COUNTER, { counter });
     }
 
-    public static createWindowOptions():Partial<WindowBaseOptions> {
+    public get windowOptions():WindowBaseOptions {
         return {
             moduleTitle: 'Counter',
             allowMultipleInstances: true,

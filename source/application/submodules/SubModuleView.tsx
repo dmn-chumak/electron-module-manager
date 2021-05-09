@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { BridgeRequestType } from './BridgeRequestType';
-import { BridgeSubWrapper } from './BridgeSubWrapper';
-import { BridgeWrapper } from './BridgeWrapper';
-import { ModuleOptions } from './ModuleOptions';
+import { BridgeRequestType } from '../BridgeRequestType';
+import { BridgeWrapper } from '../BridgeWrapper';
+import { ModuleOptions } from '../ModuleOptions';
+import { SubModuleBridgeWrapper } from './SubModuleBridgeWrapper';
 
 export class SubModuleView<ModuleType extends number, ModuleState = any, ModuleContext = any> extends React.Component<ModuleOptions<ModuleType, ModuleState>, ModuleState> {
     protected readonly _context:ModuleContext;
@@ -10,7 +10,7 @@ export class SubModuleView<ModuleType extends number, ModuleState = any, ModuleC
     public constructor(props:ModuleOptions<ModuleType, ModuleState>) {
         super(props);
 
-        this._context = BridgeSubWrapper.createModuleContext(props.moduleType);
+        this._context = SubModuleBridgeWrapper.createModuleContext(props.moduleType);
         this.state = {
             ...props.initialState
         };

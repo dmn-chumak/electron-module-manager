@@ -7,8 +7,10 @@ export class WindowBaseOptions {
     bridgePath?:string;
     attachParent?:boolean;
 
+    isFrameless?:boolean;
     isCentered?:boolean;
     isMinimizable?:boolean;
+    isAutoResizable?:boolean;
     isResizable?:boolean;
     isModal?:boolean;
 

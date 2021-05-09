@@ -1,6 +1,8 @@
+import * as ElectronTypes from 'electron';
 import { Application } from './Application';
-import { Vector } from './typedefs/Vector';
-import { Window } from './Window';
+import { Dictionary } from './declarations/Dictionary';
+import { Vector } from './declarations/Vector';
+import { ModuleWindow } from './ModuleWindow';
 import { WindowBaseOptions } from './WindowBaseOptions';
 
 export abstract class Module<ModuleType extends number, ModuleState = any> {
@@ -8,26 +10,22 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
         'constructor', 'compose', 'process', 'dispose', 'updateState'
     ];
 
-    protected readonly _window:Window<ModuleType, ModuleState>;
+    protected _window:ModuleWindow<ModuleState>;
     protected readonly _application:Application<ModuleType>;
     protected _state:ModuleState;
 
-    public constructor(application:Application<ModuleType>, window:Window<ModuleType, ModuleState>, state:Readonly<ModuleState> = null) {
-        this._window = window;
+    public constructor(application:Application<ModuleType>, state:Readonly<ModuleState> = null) {
+        this._window = null;
         this._application = application;
         this._state = { ...state };
     }
 
-    public static createWindowOptions():Partial<WindowBaseOptions> {
-        return null;
+    public async compose(window:ModuleWindow<ModuleState>):Promise<void> {
+        this._window = window;
     }
 
-    public async compose():Promise<void> {
-        // empty..
-    }
-
-    public async process(sender:any /* Electron.WebContents */, action:string, ...content:Vector<any>):Promise<any> {
-        const handler = this as any;
+    public async process(sender:ElectronTypes.WebContents, action:string, ...content:Vector<any>):Promise<any> {
+        const handler:Dictionary<any> = this as any;
 
         //-----------------------------------
 
@@ -41,11 +39,19 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
     }
 
     public async dispose():Promise<void> {
-        // empty..
+        this._window = null;
     }
 
-    public updateState(state:Partial<ModuleState>):Readonly<ModuleState> {
-        return this._state = { ...this._state, ...state };
+    public updateState(state:Partial<ModuleState>, notifyView:boolean = true):void {
+        this._state = { ...this._state, ...state };
+
+        if (notifyView) {
+            this._window.notifyModuleView(this._state);
+        }
+    }
+
+    public get windowOptions():Readonly<Partial<WindowBaseOptions>> {
+        return null;
     }
 
     public get state():Readonly<ModuleState> {

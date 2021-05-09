@@ -1,19 +1,23 @@
+import * as ElectronTypes from 'electron';
 import { BridgeRequestType } from './BridgeRequestType';
+import { Dictionary } from './declarations/Dictionary';
+import { Vector } from './declarations/Vector';
 import { Electron } from './ElectronResolver';
 import { ModuleClass } from './ModuleClass';
 import { ModuleOptions } from './ModuleOptions';
-import { Class } from './typedefs/Class';
-import { Dictionary } from './typedefs/Dictionary';
-import { Vector } from './typedefs/Vector';
+import { SubModuleWindow } from './submodules/SubModuleWindow';
 import { Window } from './Window';
 import { WindowBaseOptions } from './WindowBaseOptions';
+import { WindowClass } from './WindowClass';
 import { WindowManager } from './WindowManager';
 
 export class Application<ModuleType extends number> {
     protected readonly _windowManager:WindowManager<ModuleType>;
+    protected readonly _windowType:WindowClass<ModuleType>;
 
     public constructor(windowPath:string, bridgeScriptPath:string, moduleClassesMap:Dictionary<ModuleClass<ModuleType>> = null, allowMultipleInstances:boolean = false) {
         this._windowManager = new WindowManager<ModuleType>(this, windowPath, bridgeScriptPath, moduleClassesMap);
+        this._windowType = Window;
 
         //-----------------------------------
 
@@ -49,20 +53,20 @@ export class Application<ModuleType extends number> {
         Electron.app.quit();
     }
 
-    public async createWindowWithType<ModuleState>(windowType:Class<Window<ModuleType, ModuleState>>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
+    public async createWindowWithType<ModuleState>(windowType:WindowClass<ModuleType, ModuleState>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
         return await this._windowManager.create(windowType, windowOptions, moduleType, moduleState);
     }
 
     public async createWindow<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
-        return await this.createWindowWithType(Window, moduleType, moduleState, windowOptions);
+        return await this.createWindowWithType(this._windowType, moduleType, moduleState, windowOptions);
     }
 
-    public async createWindowParentWithType<ModuleState>(windowType:Class<Window<ModuleType, ModuleState>>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
+    public async createWindowParentWithType<ModuleState>(windowType:WindowClass<ModuleType, ModuleState>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
         return await this._windowManager.createParent(windowType, windowOptions, moduleType, moduleState);
     }
 
     public async createWindowParent<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
-        return await this.createWindowParentWithType(Window, moduleType, moduleState, windowOptions);
+        return await this.createWindowParentWithType(this._windowType, moduleType, moduleState, windowOptions);
     }
 
     public updateModuleState<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState>, notifyView:boolean = true):void {
@@ -77,29 +81,30 @@ export class Application<ModuleType extends number> {
         this._windowManager.close(moduleType);
     }
 
-    public obtainModuleState<ModuleState>(moduleType:ModuleType):ModuleState {
+    public obtainModuleState<ModuleState>(moduleType:ModuleType):Readonly<ModuleState> {
         return this._windowManager.obtainState(moduleType);
     }
 
-    protected async appModuleRequestHandler(event:any /* Electron.IpcMainInvokeEvent */, action:string, ...content:Vector<any>):Promise<any> {
+    protected async appModuleRequestHandler(event:ElectronTypes.IpcMainInvokeEvent, action:string, ...content:Vector<any>):Promise<any> {
         const window = this._windowManager.searchByWebContents(event.sender);
 
-        if (window != null && window.module != null) {
+        if (window != null) {
             return await window.module.process(event.sender, action, ...content);
         }
 
         return null;
     }
 
-    protected async appCreateSubModuleHandler(event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, moduleState:any = null):Promise<ModuleOptions<ModuleType>> {
+    protected async appCreateSubModuleHandler<ModuleState>(event:ElectronTypes.IpcMainInvokeEvent, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null):Promise<ModuleOptions<ModuleType>> {
         const window = this._windowManager.searchByWebContents(event.sender);
 
         if (window != null) {
             const moduleClass = this._windowManager.moduleClassesMap[moduleType];
+            const module = new moduleClass(this, moduleState);
 
-            const module = new moduleClass(this, window, moduleState);
+            const moduleWindow = new SubModuleWindow(window, moduleType, module);
             window.submodulesList[moduleType] = module;
-            await module.compose();
+            await moduleWindow.compose();
 
             return {
                 initialState: module.state,
@@ -110,7 +115,7 @@ export class Application<ModuleType extends number> {
         return null;
     }
 
-    protected async appSubModuleRequestHandler(event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> {
+    protected async appSubModuleRequestHandler(event:ElectronTypes.IpcMainInvokeEvent, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> {
         const window = this._windowManager.searchByWebContents(event.sender);
 
         if (window != null) {
@@ -124,7 +129,7 @@ export class Application<ModuleType extends number> {
         return null;
     }
 
-    protected async appRemoveSubModuleHandler(event:any /* Electron.IpcMainInvokeEvent */, moduleType:ModuleType):Promise<void> {
+    protected async appRemoveSubModuleHandler(event:ElectronTypes.IpcMainInvokeEvent, moduleType:ModuleType):Promise<void> {
         const window = this._windowManager.searchByWebContents(event.sender);
 
         if (window != null) {
@@ -153,7 +158,7 @@ export class Application<ModuleType extends number> {
         // empty..
     }
 
-    public get windowOptions():Partial<WindowBaseOptions> {
+    public get windowOptions():Readonly<Partial<WindowBaseOptions>> {
         return null;
     }
 

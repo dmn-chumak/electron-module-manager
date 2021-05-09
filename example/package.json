@@ -1,7 +1,7 @@
 {
     "name": "electron-module-manager-example",
     "description": "A simple example of electron-module-manager usage",
-    "version": "1.2.2",
+    "version": "1.4.1",
     "homepage": "https://github.com/dmn-chumak/electron-module-manager",
     "main": "./output/application.js",
     "author": "dmn-chumak",
@@ -11,18 +11,18 @@
         "launch": "electron ./output/application.js --enable-logging"
     },
     "devDependencies": {
-        "@types/react": "^17.0.2",
-        "@types/react-dom": "^17.0.1",
-        "@types/webpack": "^4.41.26",
-        "ts-loader": "^8.0.17",
-        "typescript": "^4.2.2",
-        "webpack": "^5.24.2",
-        "webpack-cli": "^4.5.0"
+        "@types/react": "^17.0.5",
+        "@types/react-dom": "^17.0.3",
+        "@types/webpack": "^5.28.0",
+        "ts-loader": "^9.1.2",
+        "typescript": "^4.2.4",
+        "webpack": "^5.36.2",
+        "webpack-cli": "^4.7.0"
     },
     "dependencies": {
-        "electron": "^11.3.0",
-        "electron-module-manager": "^1.2.2",
-        "react": "^17.0.1",
-        "react-dom": "^17.0.1"
+        "electron": "^12.0.7",
+        "electron-module-manager": "^1.4.1",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2"
     }
 }

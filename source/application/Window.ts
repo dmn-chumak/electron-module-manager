@@ -1,48 +1,48 @@
+import * as ElectronTypes from 'electron';
 import { Application } from './Application';
 import { BridgeRequestType } from './BridgeRequestType';
+import { Dictionary } from './declarations/Dictionary';
 import { Electron } from './ElectronResolver';
 import { Module } from './Module';
-import { Class } from './typedefs/Class';
-import { Dictionary } from './typedefs/Dictionary';
+import { ModuleWindow } from './ModuleWindow';
 import { WindowBaseOptions } from './WindowBaseOptions';
 import { WindowOptions } from './WindowOptions';
 import { WindowState } from './WindowState';
 
-export class Window<ModuleType extends number, ModuleState = any> {
+export class Window<ModuleType extends number, ModuleState = any> implements ModuleWindow<ModuleState> {
     protected readonly _submodulesList:Dictionary<Module<ModuleType>>;
     protected readonly _module:Module<ModuleType, ModuleState>;
 
-    protected readonly _nativeWindow:any /* Electron.BrowserWindow */;
+    protected readonly _nativeWindow:ElectronTypes.BrowserWindow;
     protected readonly _moduleType:ModuleType;
     protected readonly _windowOptions:WindowBaseOptions;
 
     protected _isActive:boolean;
 
-    public constructor(application:Application<ModuleType>, windowOptions:WindowBaseOptions, moduleType:ModuleType, moduleClass:Class<Module<ModuleType, ModuleState>>, moduleState:Readonly<ModuleState> = null, parent:Window<ModuleType> = null) {
-        if (moduleClass != null) {
-            this._module = new moduleClass(application, this, moduleState);
-        }
-
-        //-----------------------------------
-
+    public constructor(application:Application<ModuleType>, windowOptions:WindowBaseOptions, moduleType:ModuleType, module:Module<ModuleType, ModuleState>, parent:Window<ModuleType> = null) {
         this._nativeWindow = new Electron.BrowserWindow(this.createBrowserWindowOptions(windowOptions, parent));
-        this._nativeWindow.on('closed', this.nativeWindowCloseHandler);
-        this._nativeWindow.on('unmaximize', this.nativeWindowRestoreHandler);
-        this._nativeWindow.on('maximize', this.nativeWindowMaximizeHandler);
-        this._nativeWindow.webContents.on('did-finish-load', this.nativeWindowLoadedHandler);
-        this._nativeWindow.on('focus', this.nativeWindowFocusHandler);
-        this._nativeWindow.on('blur', this.nativeWindowBlurHandler);
+        this._nativeWindow.on('closed', this.nativeWindowCloseHandler.bind(this));
+        this._nativeWindow.on('unmaximize', this.nativeWindowRestoreHandler.bind(this));
+        this._nativeWindow.on('maximize', this.nativeWindowMaximizeHandler.bind(this));
+        this._nativeWindow.webContents.on('preferred-size-changed', this.nativeWindowResizeHandler.bind(this));
+        this._nativeWindow.webContents.on('did-finish-load', this.nativeWindowLoadedHandler.bind(this));
+        this._nativeWindow.on('focus', this.nativeWindowFocusHandler.bind(this));
+        this._nativeWindow.on('blur', this.nativeWindowBlurHandler.bind(this));
 
         //-----------------------------------
 
         this._submodulesList = {};
+        this._module = module;
         this._windowOptions = windowOptions;
-        this._isActive = false;
         this._moduleType = moduleType;
+
+        //-----------------------------------
+
+        this._isActive = false;
     }
 
     public async compose(windowPath:string):Promise<void> {
-        await this._module.compose();
+        await this._module.compose(this);
         await this._nativeWindow.loadFile(windowPath);
 
         //-----------------------------------
@@ -62,13 +62,14 @@ export class Window<ModuleType extends number, ModuleState = any> {
         }
     }
 
-    protected createBrowserWindowOptions(options:WindowBaseOptions, parent:Window<ModuleType> = null):any /* Electron.BrowserWindowConstructorOptions */ {
+    protected createBrowserWindowOptions(options:WindowBaseOptions, parent:Window<ModuleType> = null):ElectronTypes.BrowserWindowConstructorOptions {
         return {
             webPreferences: {
                 defaultEncoding: 'utf-8',
                 backgroundThrottling: false,
                 webSecurity: true,
                 contextIsolation: true,
+                enablePreferredSizeMode: options.isAutoResizable,
                 preload: options.bridgePath,
                 worldSafeExecuteJavaScript: true,
                 spellcheck: false,
@@ -79,6 +80,7 @@ export class Window<ModuleType extends number, ModuleState = any> {
             resizable: options.isResizable,
             minimizable: options.isMinimizable,
             parent: (parent != null ? parent.nativeWindow : null),
+            frame: !options.isFrameless,
             acceptFirstMouse: true,
             modal: options.isModal,
             center: options.isCentered,
@@ -95,7 +97,7 @@ export class Window<ModuleType extends number, ModuleState = any> {
         return {
             ...this._windowOptions,
             moduleType: this._moduleType,
-            moduleInitialState: (this._module != null ? this._module.state : null),
+            moduleInitialState: this._module.state,
             initialState: {
                 isMaximized: this._nativeWindow.isMaximized(),
                 isBlurred: !this._nativeWindow.isFocused()
@@ -103,14 +105,27 @@ export class Window<ModuleType extends number, ModuleState = any> {
         };
     }
 
-    private nativeWindowLoadedHandler = ():void => {
+    protected nativeWindowResizeHandler(event:ElectronTypes.Event, preferredSize:ElectronTypes.Size):void {
+        if (this._isActive && this._windowOptions.isAutoResizable) {
+            const preferredHeight = Math.max(preferredSize.height, this._windowOptions.height);
+            const currentSize = this._nativeWindow.getContentSize();
+
+            if (currentSize[1] !== preferredHeight) {
+                this._nativeWindow.setContentSize(
+                    currentSize[0], preferredHeight
+                );
+            }
+        }
+    }
+
+    protected nativeWindowLoadedHandler():void {
         this._nativeWindow.webContents.send(
             BridgeRequestType.INITIALIZE_WINDOW_STATE,
             this.createWindowOptions()
         );
-    };
+    }
 
-    private nativeWindowCloseHandler = async ():Promise<void> => {
+    protected async nativeWindowCloseHandler():Promise<void> {
         await this._module.dispose();
 
         for (const moduleType in this._submodulesList) {
@@ -122,23 +137,23 @@ export class Window<ModuleType extends number, ModuleState = any> {
         }
 
         this._isActive = false;
-    };
+    }
 
-    private nativeWindowRestoreHandler = ():void => {
+    protected nativeWindowRestoreHandler():void {
         this.updateWindowState({ isMaximized: false });
-    };
+    }
 
-    private nativeWindowMaximizeHandler = ():void => {
+    protected nativeWindowMaximizeHandler():void {
         this.updateWindowState({ isMaximized: true });
-    };
+    }
 
-    private nativeWindowFocusHandler = ():void => {
+    protected nativeWindowFocusHandler():void {
         this.updateWindowState({ isBlurred: false });
-    };
+    }
 
-    private nativeWindowBlurHandler = ():void => {
+    protected nativeWindowBlurHandler():void {
         this.updateWindowState({ isBlurred: true });
-    };
+    }
 
     public updateWindowState(state:Partial<WindowState>):void {
         if (this._isActive) {
@@ -149,32 +164,34 @@ export class Window<ModuleType extends number, ModuleState = any> {
         }
     }
 
-    public updateSubModuleState(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = true):void {
+    public notifySubModuleView<SubModuleState>(moduleType:ModuleType, state:Partial<SubModuleState>):void {
         if (this._isActive) {
             const module = this._submodulesList[moduleType];
 
             if (module != null) {
-                const fullState = module.updateState(state);
-
-                if (notifyView) {
-                    this._nativeWindow.webContents.send(
-                        BridgeRequestType.UPDATE_SUB_MODULE_STATE,
-                        moduleType, fullState
-                    );
-                }
+                this._nativeWindow.webContents.send(
+                    BridgeRequestType.UPDATE_SUB_MODULE_STATE,
+                    moduleType, state
+                );
             }
         }
     }
 
-    public updateModuleState(state:Partial<ModuleState>, notifyView:boolean = true):void {
+    public notifyModuleView(state:Partial<ModuleState>):void {
         if (this._isActive) {
-            const fullState = this._module.updateState(state);
+            this._nativeWindow.webContents.send(
+                BridgeRequestType.UPDATE_MODULE_STATE,
+                state
+            );
+        }
+    }
 
-            if (notifyView) {
-                this._nativeWindow.webContents.send(
-                    BridgeRequestType.UPDATE_MODULE_STATE,
-                    fullState
-                );
+    public closeDevTools():void {
+        if (this._isActive) {
+            const webContents = this._nativeWindow.webContents;
+
+            if (webContents.isDevToolsOpened()) {
+                webContents.closeDevTools();
             }
         }
     }
@@ -210,6 +227,10 @@ export class Window<ModuleType extends number, ModuleState = any> {
         }
     }
 
+    public get windowOptions():WindowBaseOptions {
+        return this._windowOptions;
+    }
+
     public get submodulesList():Dictionary<Module<ModuleType>> {
         return this._submodulesList;
     }
@@ -218,7 +239,7 @@ export class Window<ModuleType extends number, ModuleState = any> {
         return this._module;
     }
 
-    public get nativeWindow():any /* Electron.BrowserWindow */ {
+    public get nativeWindow():ElectronTypes.BrowserWindow {
         return this._nativeWindow;
     }
 

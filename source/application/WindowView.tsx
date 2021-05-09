@@ -1,12 +1,17 @@
 import * as React from 'react';
 import { BridgeRequestType } from './BridgeRequestType';
 import { BridgeWrapper } from './BridgeWrapper';
+import { Class } from './declarations/Class';
+import { Dictionary } from './declarations/Dictionary';
 import { ModuleView } from './ModuleView';
-import { Class } from './typedefs/Class';
 import { WindowOptions } from './WindowOptions';
 import { WindowState } from './WindowState';
 
-export class WindowView<ModuleType extends number, ModuleState = any> extends React.Component<WindowOptions<ModuleType, ModuleState>, WindowState> {
+export interface WindowProps<ModuleType extends number, ModuleState = any> extends WindowOptions<ModuleType, ModuleState> {
+    moduleViewMap?:Dictionary<Class<ModuleView<ModuleType>>>;
+}
+
+export class WindowView<ModuleType extends number, ModuleState = any> extends React.Component<WindowProps<ModuleType, ModuleState>, WindowState> {
     protected readonly _moduleViewRef:React.RefObject<ModuleView<ModuleType, ModuleState>>;
 
     public constructor(props:WindowOptions<ModuleType, ModuleState>) {

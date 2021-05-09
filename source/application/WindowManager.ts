@@ -1,10 +1,11 @@
+import * as ElectronTypes from 'electron';
 import { Application } from './Application';
+import { Dictionary } from './declarations/Dictionary';
+import { Vector } from './declarations/Vector';
 import { ModuleClass } from './ModuleClass';
-import { Class } from './typedefs/Class';
-import { Dictionary } from './typedefs/Dictionary';
-import { Vector } from './typedefs/Vector';
 import { Window } from './Window';
 import { WindowBaseOptions } from './WindowBaseOptions';
+import { WindowClass } from './WindowClass';
 
 export class WindowManager<ModuleType extends number> {
     private readonly _windowList:Vector<Window<ModuleType>>;
@@ -24,33 +25,45 @@ export class WindowManager<ModuleType extends number> {
         this._parent = null;
     }
 
-    public async create<ModuleState>(windowClass:Class<Window<ModuleType, ModuleState>>, windowOptions:WindowBaseOptions, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null):Promise<Window<ModuleType, ModuleState>> {
-        windowOptions = { bridgePath: this._bridgeScriptPath, ...windowOptions };
+    public async create<ModuleState>(windowClass:WindowClass<ModuleType, ModuleState>, windowOptions:WindowBaseOptions, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null):Promise<Window<ModuleType, ModuleState>> {
+        for (const window of this._windowList) {
+            if (window.moduleType === moduleType) {
+                const module = window.module;
 
-        //-----------------------------------
-
-        const moduleClass = this._moduleClassesMap[moduleType];
-
-        if (moduleClass != null) {
-            windowOptions = {
-                ...this._application.windowOptions,
-                ...moduleClass.createWindowOptions(),
-                ...windowOptions
-            };
-        }
-
-        if (windowOptions.allowMultipleInstances !== true) {
-            for (const window of this._windowList) {
-                if (window.moduleType === moduleType) {
+                if (!module.windowOptions.allowMultipleInstances) {
+                    window.restore();
                     return window;
                 }
             }
         }
 
+        //-----------------------------------
+
+        const moduleClass = this._moduleClassesMap[moduleType];
+
+        const module = new moduleClass(
+            this._application,
+            moduleState
+        );
+
+        //-----------------------------------
+
+        windowOptions = {
+            bridgePath: this._bridgeScriptPath,
+            ...this._application.windowOptions,
+            ...module.windowOptions,
+            ...windowOptions
+        };
+
+        //-----------------------------------
+
+        const windowParent = (windowOptions.attachParent ? this._parent : null);
+
         const window = new windowClass(
-            this._application, windowOptions, moduleType, moduleClass, moduleState, (
-                (windowOptions.attachParent ? this._parent : null)
-            )
+            this._application,
+            windowOptions,
+            moduleType, module,
+            windowParent
         );
 
         //-----------------------------------
@@ -64,7 +77,7 @@ export class WindowManager<ModuleType extends number> {
         return window;
     }
 
-    public async createParent<ModuleState>(windowClass:Class<Window<ModuleType, ModuleState>>, windowOptions:WindowBaseOptions, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null):Promise<Window<ModuleType, ModuleState>> {
+    public async createParent<ModuleState>(windowClass:WindowClass<ModuleType, ModuleState>, windowOptions:WindowBaseOptions, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null):Promise<Window<ModuleType, ModuleState>> {
         windowOptions = { ...windowOptions, attachParent: false, isModal: false };
 
         //-----------------------------------
@@ -82,7 +95,7 @@ export class WindowManager<ModuleType extends number> {
         return window;
     }
 
-    private nativeWindowCloseHandler = (event:any /* Electron.Event & { sender:Electron.BrowserWindow } */):void => {
+    private nativeWindowCloseHandler = (event:ElectronTypes.Event & { sender:ElectronTypes.BrowserWindow }):void => {
         for (let index = 0; index < this._windowList.length; index++) {
             const window = this._windowList[index];
 
@@ -98,7 +111,7 @@ export class WindowManager<ModuleType extends number> {
         }
     };
 
-    public searchByWebContents(contents:any /* Electron.WebContents */):Window<any> {
+    public searchByWebContents(contents:ElectronTypes.WebContents):Window<ModuleType> {
         for (const window of this._windowList) {
             if (window.nativeWindow.webContents === contents) {
                 return window;
@@ -110,15 +123,21 @@ export class WindowManager<ModuleType extends number> {
 
     public updateState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = true):void {
         for (const window of this._windowList) {
-            if (window.moduleType === moduleType && window.module != null) {
-                window.updateModuleState(state, notifyView);
+            if (window.moduleType === moduleType) {
+                window.module.updateState(state, notifyView);
             }
         }
     }
 
     public updateSubState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = true):void {
         for (const window of this._windowList) {
-            window.updateSubModuleState(moduleType, state, notifyView);
+            if (window.submodulesList[moduleType] != null) {
+                const module = window.submodulesList[moduleType];
+
+                if (module != null) {
+                    module.updateState(state, notifyView);
+                }
+            }
         }
     }
 
@@ -139,9 +158,9 @@ export class WindowManager<ModuleType extends number> {
         }
     }
 
-    public obtainState<ModuleState>(moduleType:ModuleType):ModuleState {
+    public obtainState<ModuleState>(moduleType:ModuleType):Readonly<ModuleState> {
         for (const window of this._windowList) {
-            if (window.moduleType === moduleType && window.module != null) {
+            if (window.moduleType === moduleType) {
                 return window.module.state;
             }
         }

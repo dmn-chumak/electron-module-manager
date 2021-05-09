@@ -1,5 +1,7 @@
-import { Vector } from './typedefs/Vector';
+import { Vector } from './declarations/Vector';
 
-export type BridgeEventHandler = ((...content:Vector<any>) => void) & {
-    nativeFunc?:(...content:Vector<any>) => void;
+type BaseEventHandler = (...content:Vector<any>) => void;
+
+export type BridgeEventHandler = BaseEventHandler & {
+    nativeFunc?:BaseEventHandler;
 };

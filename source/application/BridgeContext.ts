@@ -1,5 +1,5 @@
 import { BridgeRequestType } from './BridgeRequestType';
-import { Vector } from './typedefs/Vector';
+import { Vector } from './declarations/Vector';
 
 export interface BridgeContext {
     appendHandler(requestType:string | BridgeRequestType, handler:(...content:Vector<any>) => void):void;

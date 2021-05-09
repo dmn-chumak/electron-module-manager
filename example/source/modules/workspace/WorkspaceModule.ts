@@ -14,7 +14,7 @@ export class WorkspaceModule extends Module<ModuleType, WorkspaceModuleState> im
         await this._application.closeWindow(ModuleType.COUNTER);
     }
 
-    public static createWindowOptions():Partial<WindowBaseOptions> {
+    public get windowOptions():WindowBaseOptions {
         return {
             moduleTitle: 'Workspace',
             isResizable: false,

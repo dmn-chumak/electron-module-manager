@@ -45,12 +45,12 @@ export class CounterModule extends Module<ModuleType, CounterModuleState> implem
     public async increaseValue():Promise<void> {
         // updating module state and notifying module view
 
-        this._application.updateState(
-            this._window.moduleType, { counter: this._state.counter + 1 }, true
-        );
+        this.updateState({
+            counter: this._state.counter + 1
+        });
     }
 
-    public static createWindowOptions():Partial<WindowBaseOptions> {
+    public get windowOptions():WindowBaseOptions {
         // providing initial state for window view
 
         return {
