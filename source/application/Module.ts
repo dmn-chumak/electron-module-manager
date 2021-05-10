@@ -45,7 +45,7 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
     public updateState(state:Partial<ModuleState>, notifyView:boolean = true):void {
         this._state = { ...this._state, ...state };
 
-        if (notifyView) {
+        if (this._window != null && notifyView) {
             this._window.notifyModuleView(this._state);
         }
     }
