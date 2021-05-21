@@ -9,6 +9,7 @@ export class WindowBaseOptions {
 
     isFrameless?:boolean;
     isCentered?:boolean;
+    isMaximizable?:boolean;
     isMinimizable?:boolean;
     isAutoResizable?:boolean;
     isResizable?:boolean;

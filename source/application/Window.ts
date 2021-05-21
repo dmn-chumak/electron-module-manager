@@ -76,7 +76,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
                 sandbox: true
             },
             useContentSize: true,
-            maximizable: options.isResizable,
+            maximizable: options.isMaximizable,
             resizable: options.isResizable,
             minimizable: options.isMinimizable,
             parent: (parent != null ? parent.nativeWindow : null),

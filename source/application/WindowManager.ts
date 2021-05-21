@@ -30,7 +30,7 @@ export class WindowManager<ModuleType extends number> {
             if (window.moduleType === moduleType) {
                 const module = window.module;
 
-                if (!module.windowOptions.allowMultipleInstances) {
+                if (module.windowOptions.allowMultipleInstances !== true) {
                     window.restore();
                     return window;
                 }
