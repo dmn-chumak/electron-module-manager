@@ -8,6 +8,9 @@ const commonConfig = {
     resolve: {
         extensions: [ '.ts', '.tsx', '.js', '.jsx' ]
     },
+    optimization: {
+        usedExports: true
+    },
     watchOptions: {
         ignored: /node_modules/
     },

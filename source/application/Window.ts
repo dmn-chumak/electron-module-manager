@@ -1,8 +1,7 @@
-import * as ElectronTypes from 'electron';
+import * as Electron from 'electron';
 import { Application } from './Application';
 import { BridgeRequestType } from './BridgeRequestType';
 import { Dictionary } from './declarations/Dictionary';
-import { Electron } from './ElectronResolver';
 import { Module } from './Module';
 import { ModuleWindow } from './ModuleWindow';
 import { WindowBaseOptions } from './WindowBaseOptions';
@@ -13,7 +12,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
     protected readonly _submodulesList:Dictionary<Module<ModuleType>>;
     protected readonly _module:Module<ModuleType, ModuleState>;
 
-    protected readonly _nativeWindow:ElectronTypes.BrowserWindow;
+    protected readonly _nativeWindow:Electron.BrowserWindow;
     protected readonly _moduleType:ModuleType;
     protected readonly _windowOptions:WindowBaseOptions;
 
@@ -64,7 +63,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
         }
     }
 
-    protected createBrowserWindowOptions(options:WindowBaseOptions, parent:Window<ModuleType> = null):ElectronTypes.BrowserWindowConstructorOptions {
+    protected createBrowserWindowOptions(options:WindowBaseOptions, parent:Window<ModuleType> = null):Electron.BrowserWindowConstructorOptions {
         return {
             webPreferences: {
                 defaultEncoding: 'utf-8',
@@ -107,7 +106,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
         };
     }
 
-    protected nativeWindowResizeHandler(event:ElectronTypes.Event, preferredSize:ElectronTypes.Size):void {
+    protected nativeWindowResizeHandler(event:Electron.Event, preferredSize:Electron.Size):void {
         if (this._isActive && this._windowOptions.isAutoResizable) {
             const preferredHeight = Math.max(preferredSize.height, this._windowOptions.height);
             const currentSize = this._nativeWindow.getContentSize();
@@ -241,7 +240,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
         return this._module;
     }
 
-    public get nativeWindow():ElectronTypes.BrowserWindow {
+    public get nativeWindow():Electron.BrowserWindow {
         return this._nativeWindow;
     }
 

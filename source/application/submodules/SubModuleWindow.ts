@@ -1,4 +1,4 @@
-import * as ElectronTypes from 'electron';
+import * as Electron from 'electron';
 import { Module } from '../Module';
 import { ModuleWindow } from '../ModuleWindow';
 import { Window } from '../Window';
@@ -38,7 +38,7 @@ export class SubModuleWindow<ModuleType extends number, ModuleState = any> imple
         this._parentWindow.restore();
     }
 
-    public get nativeWindow():ElectronTypes.BrowserWindow {
+    public get nativeWindow():Electron.BrowserWindow {
         return this._parentWindow.nativeWindow;
     }
 

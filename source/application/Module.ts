@@ -1,4 +1,4 @@
-import * as ElectronTypes from 'electron';
+import * as Electron from 'electron';
 import { Application } from './Application';
 import { Dictionary } from './declarations/Dictionary';
 import { Vector } from './declarations/Vector';
@@ -24,7 +24,7 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
         this._window = window;
     }
 
-    public async process(sender:ElectronTypes.WebContents, action:string, ...content:Vector<any>):Promise<any> {
+    public async process(sender:Electron.WebContents, action:string, ...content:Vector<any>):Promise<any> {
         const handler:Dictionary<any> = this as any;
 
         //-----------------------------------

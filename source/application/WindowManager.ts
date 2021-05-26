@@ -1,4 +1,4 @@
-import * as ElectronTypes from 'electron';
+import * as Electron from 'electron';
 import { Application } from './Application';
 import { Dictionary } from './declarations/Dictionary';
 import { Vector } from './declarations/Vector';
@@ -95,7 +95,7 @@ export class WindowManager<ModuleType extends number> {
         return window;
     }
 
-    private nativeWindowCloseHandler = (event:ElectronTypes.Event & { sender:ElectronTypes.BrowserWindow }):void => {
+    private nativeWindowCloseHandler = (event:Electron.Event & { sender:Electron.BrowserWindow }):void => {
         for (let index = 0; index < this._windowList.length; index++) {
             const window = this._windowList[index];
 
@@ -111,7 +111,7 @@ export class WindowManager<ModuleType extends number> {
         }
     };
 
-    public searchByWebContents(contents:ElectronTypes.WebContents):Window<ModuleType> {
+    public searchByWebContents(contents:Electron.WebContents):Window<ModuleType> {
         for (const window of this._windowList) {
             if (window.nativeWindow.webContents === contents) {
                 return window;

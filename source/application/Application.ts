@@ -1,8 +1,7 @@
-import * as ElectronTypes from 'electron';
+import * as Electron from 'electron';
 import { BridgeRequestType } from './BridgeRequestType';
 import { Dictionary } from './declarations/Dictionary';
 import { Vector } from './declarations/Vector';
-import { Electron } from './ElectronResolver';
 import { ModuleClass } from './ModuleClass';
 import { ModuleOptions } from './ModuleOptions';
 import { SubModuleWindow } from './submodules/SubModuleWindow';
@@ -85,7 +84,7 @@ export class Application<ModuleType extends number> {
         return this._windowManager.obtainState(moduleType);
     }
 
-    protected async appModuleRequestHandler(event:ElectronTypes.IpcMainInvokeEvent, action:string, ...content:Vector<any>):Promise<any> {
+    protected async appModuleRequestHandler(event:Electron.IpcMainInvokeEvent, action:string, ...content:Vector<any>):Promise<any> {
         const window = this._windowManager.searchByWebContents(event.sender);
 
         if (window != null) {
@@ -95,7 +94,7 @@ export class Application<ModuleType extends number> {
         return null;
     }
 
-    protected async appCreateSubModuleHandler<ModuleState>(event:ElectronTypes.IpcMainInvokeEvent, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null):Promise<ModuleOptions<ModuleType>> {
+    protected async appCreateSubModuleHandler<ModuleState>(event:Electron.IpcMainInvokeEvent, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null):Promise<ModuleOptions<ModuleType>> {
         const window = this._windowManager.searchByWebContents(event.sender);
 
         if (window != null) {
@@ -115,7 +114,7 @@ export class Application<ModuleType extends number> {
         return null;
     }
 
-    protected async appSubModuleRequestHandler(event:ElectronTypes.IpcMainInvokeEvent, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> {
+    protected async appSubModuleRequestHandler(event:Electron.IpcMainInvokeEvent, moduleType:ModuleType, action:string, ...content:Vector<any>):Promise<any> {
         const window = this._windowManager.searchByWebContents(event.sender);
 
         if (window != null) {
@@ -129,7 +128,7 @@ export class Application<ModuleType extends number> {
         return null;
     }
 
-    protected async appRemoveSubModuleHandler(event:ElectronTypes.IpcMainInvokeEvent, moduleType:ModuleType):Promise<void> {
+    protected async appRemoveSubModuleHandler(event:Electron.IpcMainInvokeEvent, moduleType:ModuleType):Promise<void> {
         const window = this._windowManager.searchByWebContents(event.sender);
 
         if (window != null) {

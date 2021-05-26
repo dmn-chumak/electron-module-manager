@@ -1,12 +1,13 @@
 {
     "name": "electron-module-manager",
     "description": "A simple implementation of windows/modules management for React-based Electron application",
-    "version": "1.4.4",
+    "version": "1.4.5",
     "homepage": "https://github.com/dmn-chumak/electron-module-manager",
     "main": "./output/index.js",
     "typings": "./output/index.d.ts",
     "author": "dmn-chumak",
     "license": "MIT",
+    "sideEffects": false,
     "scripts": {
         "compile": "tsc"
     },

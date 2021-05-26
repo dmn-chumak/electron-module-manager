@@ -126,6 +126,20 @@ WindowProcessWorker.createWindow(
 );
 ```
 
+- Check that "usedExports" flag is enabled in "optimization" options for your webpack config:
+
+```javascript
+// webpack.config.js
+
+module.exports = {
+    optimization: {
+        usedExports: true
+    },
+
+    // ...
+};
+```
+
 ## Example
 
 Example application could be found [here](https://github.com/dmn-chumak/electron-module-manager/tree/master/example).
