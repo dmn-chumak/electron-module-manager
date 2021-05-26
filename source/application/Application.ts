@@ -13,11 +13,11 @@ import { WindowManager } from './WindowManager';
 
 export class Application<ModuleType extends number> {
     protected readonly _windowManager:WindowManager<ModuleType>;
-    protected readonly _windowType:WindowClass<ModuleType>;
+    protected readonly _windowClass:WindowClass<ModuleType>;
 
     public constructor(windowPath:string, bridgeScriptPath:string, moduleClassesMap:Dictionary<ModuleClass<ModuleType>> = null, allowMultipleInstances:boolean = false) {
         this._windowManager = new WindowManager<ModuleType>(this, windowPath, bridgeScriptPath, moduleClassesMap);
-        this._windowType = Window;
+        this._windowClass = Window;
 
         //-----------------------------------
 
@@ -33,11 +33,11 @@ export class Application<ModuleType extends number> {
 
             //-----------------------------------
 
-            Electron.ipcMain.handle(BridgeRequestType.PROCESS_MODULE_REQUEST, this.appModuleRequestHandler.bind(this));
+            Electron.ipcMain.handle(BridgeRequestType.OUTGOING_PROCESS_MODULE_REQUEST, this.appModuleRequestHandler.bind(this));
 
-            Electron.ipcMain.handle(BridgeRequestType.CREATE_SUB_MODULE, this.appCreateSubModuleHandler.bind(this));
-            Electron.ipcMain.handle(BridgeRequestType.PROCESS_SUB_MODULE_REQUEST, this.appSubModuleRequestHandler.bind(this));
-            Electron.ipcMain.handle(BridgeRequestType.REMOVE_SUB_MODULE, this.appRemoveSubModuleHandler.bind(this));
+            Electron.ipcMain.handle(BridgeRequestType.OUTGOING_CREATE_SUB_MODULE, this.appCreateSubModuleHandler.bind(this));
+            Electron.ipcMain.handle(BridgeRequestType.OUTGOING_PROCESS_SUB_MODULE_REQUEST, this.appSubModuleRequestHandler.bind(this));
+            Electron.ipcMain.handle(BridgeRequestType.OUTGOING_REMOVE_SUB_MODULE, this.appRemoveSubModuleHandler.bind(this));
 
             Electron.app.on('second-instance', this.appSecondInstanceHandler.bind(this));
             Electron.app.on('window-all-closed', this.appAllWindowsClosedHandler.bind(this));
@@ -53,27 +53,27 @@ export class Application<ModuleType extends number> {
         Electron.app.quit();
     }
 
-    public async createWindowWithType<ModuleState>(windowType:WindowClass<ModuleType, ModuleState>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
-        return await this._windowManager.create(windowType, windowOptions, moduleType, moduleState);
+    public async createWindowWithType<ModuleState>(windowClass:WindowClass<ModuleType, ModuleState>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
+        return await this._windowManager.create(windowClass, windowOptions, moduleType, moduleState);
     }
 
     public async createWindow<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
-        return await this.createWindowWithType(this._windowType, moduleType, moduleState, windowOptions);
+        return await this.createWindowWithType(this._windowClass, moduleType, moduleState, windowOptions);
     }
 
-    public async createWindowParentWithType<ModuleState>(windowType:WindowClass<ModuleType, ModuleState>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
-        return await this._windowManager.createParent(windowType, windowOptions, moduleType, moduleState);
+    public async createWindowParentWithType<ModuleState>(windowClass:WindowClass<ModuleType, ModuleState>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
+        return await this._windowManager.createParent(windowClass, windowOptions, moduleType, moduleState);
     }
 
     public async createWindowParent<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
-        return await this.createWindowParentWithType(this._windowType, moduleType, moduleState, windowOptions);
+        return await this.createWindowParentWithType(this._windowClass, moduleType, moduleState, windowOptions);
     }
 
-    public updateModuleState<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState>, notifyView:boolean = true):void {
+    public updateModuleState<ModuleState>(moduleType:ModuleType, moduleState:Partial<ModuleState>, notifyView:boolean = true):void {
         this._windowManager.updateState(moduleType, moduleState, notifyView);
     }
 
-    public updateSubModuleState<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState>, notifyView:boolean = true):void {
+    public updateSubModuleState<ModuleState>(moduleType:ModuleType, moduleState:Partial<ModuleState>, notifyView:boolean = true):void {
         this._windowManager.updateSubState(moduleType, moduleState, notifyView);
     }
 

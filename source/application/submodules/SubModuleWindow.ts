@@ -49,4 +49,8 @@ export class SubModuleWindow<ModuleType extends number, ModuleState = any> imple
     public get moduleType():ModuleType {
         return this._moduleType;
     }
+
+    public get isActive():boolean {
+        return this._parentWindow.isActive;
+    }
 }

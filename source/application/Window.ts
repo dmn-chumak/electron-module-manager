@@ -17,15 +17,17 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
     protected readonly _moduleType:ModuleType;
     protected readonly _windowOptions:WindowBaseOptions;
 
-    protected _isActive:boolean;
+    private _isActive:boolean;
 
     public constructor(application:Application<ModuleType>, windowOptions:WindowBaseOptions, moduleType:ModuleType, module:Module<ModuleType, ModuleState>, parent:Window<ModuleType> = null) {
         this._nativeWindow = new Electron.BrowserWindow(this.createBrowserWindowOptions(windowOptions, parent));
+
+        this._nativeWindow.webContents.on('preferred-size-changed', this.nativeWindowResizeHandler.bind(this));
+        this._nativeWindow.webContents.on('did-finish-load', this.nativeWindowLoadedHandler.bind(this));
+
         this._nativeWindow.on('closed', this.nativeWindowCloseHandler.bind(this));
         this._nativeWindow.on('unmaximize', this.nativeWindowRestoreHandler.bind(this));
         this._nativeWindow.on('maximize', this.nativeWindowMaximizeHandler.bind(this));
-        this._nativeWindow.webContents.on('preferred-size-changed', this.nativeWindowResizeHandler.bind(this));
-        this._nativeWindow.webContents.on('did-finish-load', this.nativeWindowLoadedHandler.bind(this));
         this._nativeWindow.on('focus', this.nativeWindowFocusHandler.bind(this));
         this._nativeWindow.on('blur', this.nativeWindowBlurHandler.bind(this));
 
@@ -100,7 +102,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
             moduleInitialState: this._module.state,
             initialState: {
                 isMaximized: this._nativeWindow.isMaximized(),
-                isBlurred: !this._nativeWindow.isFocused()
+                isFocused: this._nativeWindow.isFocused()
             }
         };
     }
@@ -120,7 +122,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
 
     protected nativeWindowLoadedHandler():void {
         this._nativeWindow.webContents.send(
-            BridgeRequestType.INITIALIZE_WINDOW_STATE,
+            BridgeRequestType.INCOMING_INITIALIZE_WINDOW_STATE,
             this.createWindowOptions()
         );
     }
@@ -147,18 +149,18 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
         this.updateWindowState({ isMaximized: true });
     }
 
-    protected nativeWindowFocusHandler():void {
-        this.updateWindowState({ isBlurred: false });
+    protected nativeWindowBlurHandler():void {
+        this.updateWindowState({ isFocused: false });
     }
 
-    protected nativeWindowBlurHandler():void {
-        this.updateWindowState({ isBlurred: true });
+    protected nativeWindowFocusHandler():void {
+        this.updateWindowState({ isFocused: true });
     }
 
     public updateWindowState(state:Partial<WindowState>):void {
-        if (this._isActive) {
+        if (this._isActive && this._windowOptions.notifyStateUpdates) {
             this._nativeWindow.webContents.send(
-                BridgeRequestType.UPDATE_WINDOW_STATE,
+                BridgeRequestType.INCOMING_UPDATE_WINDOW_STATE,
                 state
             );
         }
@@ -170,7 +172,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
 
             if (module != null) {
                 this._nativeWindow.webContents.send(
-                    BridgeRequestType.UPDATE_SUB_MODULE_STATE,
+                    BridgeRequestType.INCOMING_UPDATE_SUB_MODULE_STATE,
                     moduleType, state
                 );
             }
@@ -180,7 +182,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
     public notifyModuleView(state:Partial<ModuleState>):void {
         if (this._isActive) {
             this._nativeWindow.webContents.send(
-                BridgeRequestType.UPDATE_MODULE_STATE,
+                BridgeRequestType.INCOMING_UPDATE_MODULE_STATE,
                 state
             );
         }
@@ -245,5 +247,9 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
 
     public get moduleType():ModuleType {
         return this._moduleType;
+    }
+
+    public get isActive():boolean {
+        return this._isActive;
     }
 }

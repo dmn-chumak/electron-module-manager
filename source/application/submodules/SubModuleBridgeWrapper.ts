@@ -19,7 +19,7 @@ export class SubModuleBridgeWrapper<ModuleType extends number> implements ProxyH
     public get(target:any, action:string):any {
         return async (...content:Vector<any>):Promise<any> => {
             return await this._bridgeContext.invoke(
-                BridgeRequestType.PROCESS_SUB_MODULE_REQUEST,
+                BridgeRequestType.OUTGOING_PROCESS_SUB_MODULE_REQUEST,
                 this._moduleType, action, ...content
             );
         };

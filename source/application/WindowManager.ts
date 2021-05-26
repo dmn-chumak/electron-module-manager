@@ -121,21 +121,21 @@ export class WindowManager<ModuleType extends number> {
         return null;
     }
 
-    public updateState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = true):void {
+    public updateState<ModuleState>(moduleType:ModuleType, moduleState:Partial<ModuleState>, notifyView:boolean = true):void {
         for (const window of this._windowList) {
             if (window.moduleType === moduleType) {
-                window.module.updateState(state, notifyView);
+                window.module.updateState(moduleState, notifyView);
             }
         }
     }
 
-    public updateSubState<ModuleState>(moduleType:ModuleType, state:Partial<ModuleState>, notifyView:boolean = true):void {
+    public updateSubState<ModuleState>(moduleType:ModuleType, moduleState:Partial<ModuleState>, notifyView:boolean = true):void {
         for (const window of this._windowList) {
             if (window.submodulesList[moduleType] != null) {
                 const module = window.submodulesList[moduleType];
 
                 if (module != null) {
-                    module.updateState(state, notifyView);
+                    module.updateState(moduleState, notifyView);
                 }
             }
         }

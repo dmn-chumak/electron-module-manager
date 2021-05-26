@@ -5,6 +5,7 @@ export class WindowBaseOptions {
     forceDevTools?:boolean;
     allowMultipleInstances?:boolean;
     bridgePath?:string;
+    notifyStateUpdates?:boolean;
     attachParent?:boolean;
 
     isFrameless?:boolean;

@@ -11,7 +11,7 @@ export interface WindowProps<ModuleType extends number, ModuleState = any> exten
     moduleViewMap?:Dictionary<Class<ModuleView<ModuleType>>>;
 }
 
-export class WindowView<ModuleType extends number, ModuleState = any> extends React.Component<WindowProps<ModuleType, ModuleState>, WindowState> {
+export class WindowView<ModuleType extends number, ModuleState = any> extends React.PureComponent<WindowProps<ModuleType, ModuleState>, WindowState> {
     protected readonly _moduleViewRef:React.RefObject<ModuleView<ModuleType, ModuleState>>;
 
     public constructor(props:WindowOptions<ModuleType, ModuleState>) {
@@ -28,11 +28,11 @@ export class WindowView<ModuleType extends number, ModuleState = any> extends Re
     };
 
     public componentDidMount():void {
-        BridgeWrapper.context.appendHandler(BridgeRequestType.UPDATE_WINDOW_STATE, this.windowStateUpdateHandler);
+        BridgeWrapper.context.appendHandler(BridgeRequestType.INCOMING_UPDATE_WINDOW_STATE, this.windowStateUpdateHandler);
     }
 
     public componentWillUnmount():void {
-        BridgeWrapper.context.removeHandler(BridgeRequestType.UPDATE_WINDOW_STATE, this.windowStateUpdateHandler);
+        BridgeWrapper.context.removeHandler(BridgeRequestType.INCOMING_UPDATE_WINDOW_STATE, this.windowStateUpdateHandler);
     }
 
     public createModuleElement(moduleView:Class<ModuleView<ModuleType, ModuleState>>):React.ReactNode {

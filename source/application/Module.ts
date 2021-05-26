@@ -46,7 +46,7 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
         this._state = { ...this._state, ...state };
 
         if (this._window != null && notifyView) {
-            this._window.notifyModuleView(this._state);
+            this._window.notifyModuleView(state);
         }
     }
 

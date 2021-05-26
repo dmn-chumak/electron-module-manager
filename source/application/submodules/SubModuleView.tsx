@@ -4,7 +4,7 @@ import { BridgeWrapper } from '../BridgeWrapper';
 import { ModuleOptions } from '../ModuleOptions';
 import { SubModuleBridgeWrapper } from './SubModuleBridgeWrapper';
 
-export class SubModuleView<ModuleType extends number, ModuleState = any, ModuleContext = any> extends React.Component<ModuleOptions<ModuleType, ModuleState>, ModuleState> {
+export class SubModuleView<ModuleType extends number, ModuleState = any, ModuleContext = any> extends React.PureComponent<ModuleOptions<ModuleType, ModuleState>, ModuleState> {
     protected readonly _context:ModuleContext;
 
     public constructor(props:ModuleOptions<ModuleType, ModuleState>) {
@@ -23,11 +23,11 @@ export class SubModuleView<ModuleType extends number, ModuleState = any, ModuleC
     };
 
     public componentDidMount():void {
-        BridgeWrapper.context.appendHandler(BridgeRequestType.UPDATE_SUB_MODULE_STATE, this.moduleStateUpdateHandler);
+        BridgeWrapper.context.appendHandler(BridgeRequestType.INCOMING_UPDATE_SUB_MODULE_STATE, this.moduleStateUpdateHandler);
     }
 
     public componentWillUnmount():void {
-        BridgeWrapper.context.removeHandler(BridgeRequestType.UPDATE_SUB_MODULE_STATE, this.moduleStateUpdateHandler);
+        BridgeWrapper.context.removeHandler(BridgeRequestType.INCOMING_UPDATE_SUB_MODULE_STATE, this.moduleStateUpdateHandler);
     }
 
     public render():React.ReactNode {
