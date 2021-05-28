@@ -23,16 +23,20 @@ export class WindowView<ModuleType extends number, ModuleState = any> extends Re
         };
     }
 
-    private windowStateUpdateHandler = (state:Readonly<WindowState>):void => {
-        this.setState(state);
+    private internal_windowStateUpdateHandler = (state:Readonly<WindowState>):void => {
+        this.componentStateUpdate(state);
     };
 
+    public componentStateUpdate(state:Readonly<WindowState>):void {
+        this.setState(state);
+    }
+
     public componentDidMount():void {
-        BridgeWrapper.context.appendHandler(BridgeRequestType.INCOMING_UPDATE_WINDOW_STATE, this.windowStateUpdateHandler);
+        BridgeWrapper.context.appendHandler(BridgeRequestType.INCOMING_UPDATE_WINDOW_STATE, this.internal_windowStateUpdateHandler);
     }
 
     public componentWillUnmount():void {
-        BridgeWrapper.context.removeHandler(BridgeRequestType.INCOMING_UPDATE_WINDOW_STATE, this.windowStateUpdateHandler);
+        BridgeWrapper.context.removeHandler(BridgeRequestType.INCOMING_UPDATE_WINDOW_STATE, this.internal_windowStateUpdateHandler);
     }
 
     public createModuleElement(moduleView:Class<ModuleView<ModuleType, ModuleState>>):React.ReactNode {
@@ -54,7 +58,7 @@ export class WindowView<ModuleType extends number, ModuleState = any> extends Re
             }
         }
 
-        return this.createModuleElement(ModuleView);
+        return null;
     }
 
     public render():React.ReactNode {

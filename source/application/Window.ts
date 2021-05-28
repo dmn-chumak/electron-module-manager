@@ -53,8 +53,8 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
         }
 
         this._nativeWindow.setMenu(null);
-        this._nativeWindow.show();
         this._isActive = true;
+        this._nativeWindow.show();
 
         //-----------------------------------
 
@@ -64,7 +64,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
     }
 
     protected createBrowserWindowOptions(options:WindowBaseOptions, parent:Window<ModuleType> = null):Electron.BrowserWindowConstructorOptions {
-        return {
+        const browserOptions:Electron.BrowserWindowConstructorOptions = {
             webPreferences: {
                 defaultEncoding: 'utf-8',
                 backgroundThrottling: false,
@@ -96,6 +96,17 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
             title: options.moduleTitle,
             show: false
         };
+
+        //-----------------------------------
+
+        if (options.moduleIcon != null) {
+            // due to issue in electron, only non-null value should be provided
+            browserOptions.icon = options.moduleIcon;
+        }
+
+        //-----------------------------------
+
+        return browserOptions;
     }
 
     protected createWindowOptions():WindowOptions<ModuleType, ModuleState> {

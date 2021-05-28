@@ -15,16 +15,20 @@ export class ModuleView<ModuleType extends number, ModuleState = any, ModuleCont
         };
     }
 
-    private moduleStateUpdateHandler = (state:Readonly<ModuleState>):void => {
-        this.setState(state);
+    private internal_moduleStateUpdateHandler = (state:Readonly<ModuleState>):void => {
+        this.componentStateUpdate(state);
     };
 
+    public componentStateUpdate(state:Readonly<ModuleState>):void {
+        this.setState(state);
+    }
+
     public componentDidMount():void {
-        BridgeWrapper.context.appendHandler(BridgeRequestType.INCOMING_UPDATE_MODULE_STATE, this.moduleStateUpdateHandler);
+        BridgeWrapper.context.appendHandler(BridgeRequestType.INCOMING_UPDATE_MODULE_STATE, this.internal_moduleStateUpdateHandler);
     }
 
     public componentWillUnmount():void {
-        BridgeWrapper.context.removeHandler(BridgeRequestType.INCOMING_UPDATE_MODULE_STATE, this.moduleStateUpdateHandler);
+        BridgeWrapper.context.removeHandler(BridgeRequestType.INCOMING_UPDATE_MODULE_STATE, this.internal_moduleStateUpdateHandler);
     }
 
     public render():React.ReactNode {
