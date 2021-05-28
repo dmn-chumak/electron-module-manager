@@ -70,6 +70,10 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
                 backgroundThrottling: false,
                 webSecurity: true,
                 contextIsolation: true,
+                allowRunningInsecureContent: false,
+                enableRemoteModule: false,
+                nodeIntegrationInSubFrames: false,
+                nodeIntegration: false,
                 enablePreferredSizeMode: options.isAutoResizable,
                 preload: options.bridgePath,
                 worldSafeExecuteJavaScript: true,
@@ -226,6 +230,10 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
 
             this._nativeWindow.focus();
         }
+    }
+
+    public get nativeWebContents():Electron.WebContents {
+        return this._nativeWindow.webContents;
     }
 
     public get windowOptions():WindowBaseOptions {

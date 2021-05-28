@@ -50,6 +50,12 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
         }
     }
 
+    public notifyState():void {
+        if (this._window != null) {
+            this._window.notifyModuleView(this._state);
+        }
+    }
+
     public get windowOptions():Readonly<Partial<WindowBaseOptions>> {
         return null;
     }

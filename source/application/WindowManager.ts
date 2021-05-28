@@ -111,6 +111,16 @@ export class WindowManager<ModuleType extends number> {
         }
     };
 
+    public searchByModuleType(moduleType:ModuleType):Window<ModuleType> {
+        for (const window of this._windowList) {
+            if (window.moduleType === moduleType) {
+                return window;
+            }
+        }
+
+        return null;
+    }
+
     public searchByWebContents(contents:Electron.WebContents):Window<ModuleType> {
         for (const window of this._windowList) {
             if (window.nativeWindow.webContents === contents) {
