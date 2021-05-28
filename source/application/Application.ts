@@ -88,7 +88,7 @@ export class Application<ModuleType extends number> {
         const window = this._windowManager.searchByWebContents(event.sender);
 
         if (window != null) {
-            return await window.module.process(event.sender, action, ...content);
+            return await window.module.process(event, action, ...content);
         }
 
         return null;
@@ -121,7 +121,7 @@ export class Application<ModuleType extends number> {
             const module = window.submodulesList[moduleType];
 
             if (module != null) {
-                return await module.process(event.sender, action, ...content);
+                return await module.process(event, action, ...content);
             }
         }
 

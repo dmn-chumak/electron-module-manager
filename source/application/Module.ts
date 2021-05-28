@@ -24,7 +24,7 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
         this._window = window;
     }
 
-    public async process(sender:Electron.WebContents, action:string, ...content:Vector<any>):Promise<any> {
+    public async process(event:Electron.IpcMainInvokeEvent, action:string, ...content:Vector<any>):Promise<any> {
         const handler:Dictionary<any> = this as any;
 
         //-----------------------------------
