@@ -10,7 +10,7 @@ export class SubModuleView<ModuleType extends number, ModuleState = any, ModuleC
     public constructor(props:ModuleOptions<ModuleType, ModuleState>) {
         super(props);
 
-        this._context = SubModuleBridgeWrapper.createModuleContext(props.moduleType);
+        this._context = SubModuleBridgeWrapper.createSubModuleContext(props.moduleType);
         this.state = {
             ...props.initialState
         };

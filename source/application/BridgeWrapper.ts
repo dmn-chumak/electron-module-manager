@@ -5,7 +5,7 @@ import { Vector } from './declarations/Vector';
 import { ModuleOptions } from './ModuleOptions';
 
 export class BridgeWrapper implements ProxyHandler<any> {
-    private readonly _bridgeContext:BridgeContext;
+    protected readonly _bridgeContext:BridgeContext;
 
     public constructor(bridgeContext:BridgeContext) {
         this._bridgeContext = bridgeContext;
@@ -23,13 +23,15 @@ export class BridgeWrapper implements ProxyHandler<any> {
         await BridgeWrapper.context.invoke(BridgeRequestType.OUTGOING_REMOVE_SUB_MODULE, moduleType);
     }
 
+    protected async invokeRequest(action:string, ...content:Vector<any>):Promise<any> {
+        return await this._bridgeContext.invoke(
+            BridgeRequestType.OUTGOING_PROCESS_MODULE_REQUEST,
+            action, ...content
+        );
+    }
+
     public get(target:any, action:string):any {
-        return async (...content:Vector<any>):Promise<any> => {
-            return await this._bridgeContext.invoke(
-                BridgeRequestType.OUTGOING_PROCESS_MODULE_REQUEST,
-                action, ...content
-            );
-        };
+        return this.invokeRequest.bind(this, action);
     }
 
     public static get context():BridgeContext {
