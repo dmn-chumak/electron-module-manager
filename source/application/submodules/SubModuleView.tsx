@@ -27,11 +27,11 @@ export class SubModuleView<ModuleType extends number, ModuleState = any, ModuleC
     }
 
     public componentDidMount():void {
-        BridgeWrapper.context.appendHandler(BridgeRequestType.INCOMING_UPDATE_SUB_MODULE_STATE, this.internal_moduleStateUpdateHandler);
+        BridgeWrapper.appendHandler(BridgeRequestType.INCOMING_UPDATE_SUB_MODULE_STATE, this.internal_moduleStateUpdateHandler);
     }
 
     public componentWillUnmount():void {
-        BridgeWrapper.context.removeHandler(BridgeRequestType.INCOMING_UPDATE_SUB_MODULE_STATE, this.internal_moduleStateUpdateHandler);
+        BridgeWrapper.removeHandler(BridgeRequestType.INCOMING_UPDATE_SUB_MODULE_STATE, this.internal_moduleStateUpdateHandler);
     }
 
     public render():React.ReactNode {

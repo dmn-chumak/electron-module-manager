@@ -1,5 +1,7 @@
+import * as Electron from 'electron';
 import { BridgeContext } from './BridgeContext';
 import { DEFAULT_BRIDGE_CONTEXT_PATH } from './BridgeContextDefaultPath';
+import { BridgeEventHandler } from './BridgeEventHandler';
 import { BridgeRequestType } from './BridgeRequestType';
 import { Vector } from './declarations/Vector';
 import { ModuleOptions } from './ModuleOptions';
@@ -15,12 +17,40 @@ export class BridgeWrapper implements ProxyHandler<any> {
         return new Proxy(window, new BridgeWrapper((bridgeContext != null) ? bridgeContext : BridgeWrapper.context));
     }
 
+    public static appendHandler(requestType:string, handler:BridgeEventHandler):void {
+        BridgeWrapper.context.appendHandler(
+            requestType, handler.nativeFunc = (event:Electron.IpcRendererEvent, ...content:Vector<any>) => {
+                handler(...content);
+            }
+        );
+    }
+
+    public static appendHandlerOnce(requestType:string, handler:BridgeEventHandler):void {
+        BridgeWrapper.context.appendHandlerOnce(
+            requestType, handler.nativeFunc = (event:Electron.IpcRendererEvent, ...content:Vector<any>) => {
+                handler(...content);
+            }
+        );
+    }
+
+    public static removeHandler(requestType:string, handler:BridgeEventHandler):void {
+        BridgeWrapper.context.removeHandler(
+            requestType, handler.nativeFunc
+        );
+    }
+
     public static async createSubModule<ModuleType extends number, ModuleState = any>(moduleType:ModuleType, moduleState:Readonly<Partial<ModuleState>> = null):Promise<ModuleOptions<ModuleType, ModuleState>> {
-        return await BridgeWrapper.context.invoke(BridgeRequestType.OUTGOING_CREATE_SUB_MODULE, moduleType, moduleState);
+        return await BridgeWrapper.context.invoke(
+            BridgeRequestType.OUTGOING_CREATE_SUB_MODULE,
+            moduleType, moduleState
+        );
     }
 
     public static async removeSubModule<ModuleType extends number>(moduleType:ModuleType):Promise<void> {
-        await BridgeWrapper.context.invoke(BridgeRequestType.OUTGOING_REMOVE_SUB_MODULE, moduleType);
+        await BridgeWrapper.context.invoke(
+            BridgeRequestType.OUTGOING_REMOVE_SUB_MODULE,
+            moduleType
+        );
     }
 
     protected async invokeRequest(action:string, ...content:Vector<any>):Promise<any> {

@@ -32,11 +32,11 @@ export class WindowView<ModuleType extends number, ModuleState = any> extends Re
     }
 
     public componentDidMount():void {
-        BridgeWrapper.context.appendHandler(BridgeRequestType.INCOMING_UPDATE_WINDOW_STATE, this.internal_windowStateUpdateHandler);
+        BridgeWrapper.appendHandler(BridgeRequestType.INCOMING_UPDATE_WINDOW_STATE, this.internal_windowStateUpdateHandler);
     }
 
     public componentWillUnmount():void {
-        BridgeWrapper.context.removeHandler(BridgeRequestType.INCOMING_UPDATE_WINDOW_STATE, this.internal_windowStateUpdateHandler);
+        BridgeWrapper.removeHandler(BridgeRequestType.INCOMING_UPDATE_WINDOW_STATE, this.internal_windowStateUpdateHandler);
     }
 
     public createModuleElement(moduleView:Class<ModuleView<ModuleType, ModuleState>>):React.ReactNode {

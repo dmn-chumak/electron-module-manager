@@ -6,32 +6,24 @@ import { Vector } from './declarations/Vector';
 
 export const DEFAULT_BRIDGE_CONTEXT:BridgeContext = {
     async appendHandler(requestType:string | BridgeRequestType, handler:BridgeEventHandler):Promise<void> {
-        Electron.ipcRenderer.on(
-            requestType, handler.nativeFunc = (event:Electron.IpcRendererEvent, ...content:Vector<any>) => {
-                handler(...content);
-            }
-        );
+        Electron.ipcRenderer.on(requestType, handler);
     },
 
     async appendHandlerOnce(requestType:string | BridgeRequestType, handler:BridgeEventHandler):Promise<void> {
-        Electron.ipcRenderer.once(
-            requestType, handler.nativeFunc = (event:Electron.IpcRendererEvent, ...content:Vector<any>) => {
-                handler(...content);
-            }
-        );
+        Electron.ipcRenderer.once(requestType, handler);
     },
 
     async removeHandler(requestType:string | BridgeRequestType, handler:BridgeEventHandler):Promise<void> {
-        if (handler == null || handler.nativeFunc == null) {
+        if (handler == null) {
             Electron.ipcRenderer.removeAllListeners(requestType);
         } else {
             Electron.ipcRenderer.removeListener(
-                requestType, handler.nativeFunc
+                requestType, handler
             );
         }
     },
 
-    async invoke<ModuleType>(requestType:string | BridgeRequestType, action:string, ...content:Vector<any>):Promise<any> {
+    async invoke(requestType:string | BridgeRequestType, action:string, ...content:Vector<any>):Promise<any> {
         return await Electron.ipcRenderer.invoke(
             requestType, action, ...content
         );
