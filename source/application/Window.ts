@@ -16,7 +16,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
     protected readonly _moduleType:ModuleType;
     protected readonly _windowOptions:WindowBaseOptions;
 
-    private _isActive:boolean;
+    protected _isActive:boolean;
 
     public constructor(application:Application<ModuleType>, windowOptions:WindowBaseOptions, moduleType:ModuleType, module:Module<ModuleType, ModuleState>, parent:Window<ModuleType> = null) {
         this._nativeWindow = new Electron.BrowserWindow(this.createBrowserWindowOptions(windowOptions, parent));
