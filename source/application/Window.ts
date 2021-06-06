@@ -12,6 +12,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
     protected readonly _submodulesList:Dictionary<Module<ModuleType>>;
     protected readonly _module:Module<ModuleType, ModuleState>;
 
+    protected readonly _application:Application<ModuleType>;
     protected readonly _nativeWindow:Electron.BrowserWindow;
     protected readonly _moduleType:ModuleType;
     protected readonly _windowOptions:WindowBaseOptions;
@@ -32,6 +33,7 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
 
         //-----------------------------------
 
+        this._application = application;
         this._submodulesList = {};
         this._module = module;
         this._windowOptions = windowOptions;
@@ -81,14 +83,15 @@ export class Window<ModuleType extends number, ModuleState = any> implements Mod
                 sandbox: true
             },
             useContentSize: true,
-            maximizable: options.isMaximizable,
-            resizable: options.isResizable,
-            minimizable: options.isMinimizable,
+            maximizable: (options.isMaximizable !== false),
+            resizable: (options.isResizable !== false),
+            minimizable: (options.isMinimizable !== false),
+            movable: (options.isMovable !== false),
             parent: (parent != null ? parent.nativeWindow : null),
-            frame: !options.isFrameless,
+            frame: (options.isFrameless !== true),
             acceptFirstMouse: true,
-            modal: options.isModal,
-            center: options.isCentered,
+            modal: (options.isModal === true),
+            center: (options.isCentered === true),
             minHeight: options.minHeight,
             minWidth: options.minWidth,
             height: options.height,

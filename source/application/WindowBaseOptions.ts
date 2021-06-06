@@ -15,6 +15,7 @@ export class WindowBaseOptions {
     isAutoResizable?:boolean;
     isResizable?:boolean;
     isModal?:boolean;
+    isMovable?:boolean;
 
     minWidth?:number;
     minHeight?:number;
