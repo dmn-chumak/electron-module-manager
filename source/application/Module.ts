@@ -7,10 +7,10 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
     protected readonly _application:Application<ModuleType>;
     protected _state:ModuleState;
 
-    public constructor(application:Application<ModuleType>, state:Readonly<ModuleState> = null) {
+    public constructor(application:Application<ModuleType>, state:ModuleState = null) {
         this._window = null;
         this._application = application;
-        this._state = { ...state };
+        this._state = state;
     }
 
     public async compose(window:ModuleWindow<ModuleState>):Promise<void> {
@@ -22,16 +22,20 @@ export abstract class Module<ModuleType extends number, ModuleState = any> {
     }
 
     public updateState(state:Partial<ModuleState>, notifyView:boolean = true):void {
-        this._state = { ...this._state, ...state };
+        for (const property in state) {
+            if (state.hasOwnProperty(property)) {
+                this._state[property] = state[property];
+            }
+        }
 
-        if (this._window != null && notifyView) {
-            this._window.notifyModuleView(this._state);
+        if (notifyView) {
+            this.notifyState(state);
         }
     }
 
-    public notifyState():void {
+    public notifyState(state:Partial<ModuleState>):void {
         if (this._window != null) {
-            this._window.notifyModuleView(this._state);
+            this._window.notifyModuleView(state);
         }
     }
 

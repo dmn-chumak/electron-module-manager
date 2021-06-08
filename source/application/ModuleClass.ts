@@ -5,6 +5,6 @@ import { Module } from './Module';
 export type ModuleClass<ModuleType extends number, ModuleState = any> = (
     Class<Module<ModuleType, ModuleState>, [
         Application<ModuleType>,
-        Readonly<ModuleState>
+        ModuleState
     ]>
 );
