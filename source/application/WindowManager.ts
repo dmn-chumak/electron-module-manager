@@ -25,7 +25,7 @@ export class WindowManager<ModuleType extends number> {
         this._parent = null;
     }
 
-    public async create<ModuleState>(windowClass:WindowClass<ModuleType, ModuleState>, windowOptions:WindowBaseOptions, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null):Promise<Window<ModuleType, ModuleState>> {
+    public async create<ModuleState>(windowClass:WindowClass<ModuleType, ModuleState>, windowOptions:WindowBaseOptions, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, parent:Window<any> = null):Promise<Window<ModuleType, ModuleState>> {
         for (const window of this._windowList) {
             if (window.moduleType === moduleType) {
                 const module = window.module;
@@ -57,7 +57,11 @@ export class WindowManager<ModuleType extends number> {
 
         //-----------------------------------
 
-        const windowParent = (windowOptions.attachParent ? this._parent : null);
+        const windowParent = (
+            (parent == null)
+                ? (windowOptions.attachParent ? this._parent : null)
+                : parent
+        );
 
         const window = new windowClass(
             this._application,

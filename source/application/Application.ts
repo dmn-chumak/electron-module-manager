@@ -53,12 +53,12 @@ export class Application<ModuleType extends number> {
         Electron.app.quit();
     }
 
-    public async createWindowWithType<ModuleState>(windowClass:WindowClass<ModuleType, ModuleState>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
-        return await this._windowManager.create(windowClass, windowOptions, moduleType, moduleState);
+    public async createWindowWithType<ModuleState>(windowClass:WindowClass<ModuleType, ModuleState>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null, parent:Window<any> = null):Promise<Window<ModuleType, ModuleState>> {
+        return await this._windowManager.create(windowClass, windowOptions, moduleType, moduleState, parent);
     }
 
-    public async createWindow<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
-        return await this.createWindowWithType(this._windowClass, moduleType, moduleState, windowOptions);
+    public async createWindow<ModuleState>(moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null, parent:Window<any> = null):Promise<Window<ModuleType, ModuleState>> {
+        return await this.createWindowWithType(this._windowClass, moduleType, moduleState, windowOptions, parent);
     }
 
     public async createWindowParentWithType<ModuleState>(windowClass:WindowClass<ModuleType, ModuleState>, moduleType:ModuleType, moduleState:Readonly<ModuleState> = null, windowOptions:WindowBaseOptions = null):Promise<Window<ModuleType, ModuleState>> {
