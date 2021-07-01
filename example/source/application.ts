@@ -20,7 +20,7 @@ const application = new Application(
 //-----------------------------------
 
 Electron.app.on('ready', async () => {
-    await application.createWindowParent<WorkspaceModuleState>(
+    await application.windowManager.createParent<WorkspaceModuleState>(
         ModuleType.WORKSPACE, {
             counter: 0
         }

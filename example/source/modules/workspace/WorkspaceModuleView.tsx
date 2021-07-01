@@ -1,10 +1,8 @@
-import { ModuleView } from 'electron-module-manager/output/application/ModuleView';
+import { ModuleView } from 'electron-module-manager';
 import * as React from 'react';
-import { ModuleType } from '../ModuleType';
-import { WorkspaceModuleContext } from './WorkspaceModuleContext';
-import { WorkspaceModuleState } from './WorkspaceModuleState';
+import { WorkspaceModule } from './WorkspaceModule';
 
-export class WorkspaceModuleView extends ModuleView<ModuleType, WorkspaceModuleState, WorkspaceModuleContext> {
+export class WorkspaceModuleView extends ModuleView<WorkspaceModule> {
     private addClickHandler = async () => {
         await this._context.createCounterDialog();
     };

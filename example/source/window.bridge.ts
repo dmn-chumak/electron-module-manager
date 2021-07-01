@@ -1,5 +1,5 @@
-import { WindowBridgeProcessWorker } from 'electron-module-manager';
+import { BridgeProcessWorker } from 'electron-module-manager';
 
-WindowBridgeProcessWorker.createBridge(
-    // initializing bridge between module view & context
+BridgeProcessWorker.createBridge(
+    // empty..
 );

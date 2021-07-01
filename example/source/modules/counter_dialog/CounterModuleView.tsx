@@ -1,10 +1,8 @@
-import { ModuleView } from 'electron-module-manager/output/application/ModuleView';
+import { ModuleView } from 'electron-module-manager';
 import * as React from 'react';
-import { ModuleType } from '../ModuleType';
-import { CounterModuleContext } from './CounterModuleContext';
-import { CounterModuleState } from './CounterModuleState';
+import { CounterModule } from './CounterModule';
 
-export class CounterModuleView extends ModuleView<ModuleType, CounterModuleState, CounterModuleContext> {
+export class CounterModuleView extends ModuleView<CounterModule> {
     private _updatesCount:number = 0;
 
     private increaseCounterValue = async () => {
