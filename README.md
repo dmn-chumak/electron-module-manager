@@ -30,18 +30,10 @@ export interface CounterModuleState {
 }
 ```
 
-- Create an interface with the **module context** (_optional_):
+- Create **module class**, extending base _Module_ class:
 
 ```typescript
-export interface CounterModuleContext {
-    increaseValue():Promise<void>;
-}
-```
-
-- Create **module class**, extending base _Module_ class and implementing **module context** interface:
-
-```typescript
-export class CounterModule extends Module<ModuleType, CounterModuleState> implements CounterModuleContext {
+export class CounterModule extends Module<CounterModuleState, CounterModuleView> {
     public async increaseValue():Promise<void> {
         // updating module state and notifying module view
 
@@ -65,7 +57,7 @@ export class CounterModule extends Module<ModuleType, CounterModuleState> implem
 - Create **module view class**, extending base _ModuleView_ class:
 
 ```typescript jsx
-export class CounterModuleView extends ModuleView<ModuleType, CounterModuleState, CounterModuleContext> {
+export class CounterModuleView extends ModuleView<CounterModule> {
     private _updatesCount:number = 0;
 
     private increaseCounterValue = async () => {
@@ -101,7 +93,7 @@ const application = new Application(
 );
 
 Electron.app.on('ready', async () => {
-    await application.createWindowParent<CounterModuleState>(
+    await application.windowManager.createParent<CounterModuleState>(
         ModuleType.COUNTER, {
             // setting up initial module state
             counter: 0
@@ -111,9 +103,9 @@ Electron.app.on('ready', async () => {
 ```
 
 ```typescript
-// window.bridge.js - exposing main process API to renderer 
+// window.bridge.js - preload script, exposing main process API to renderer 
 
-WindowBridgeProcessWorker.createBridge();
+BridgeProcessWorker.createBridge();
 ```
 
 ```typescript
