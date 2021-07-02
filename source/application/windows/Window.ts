@@ -26,8 +26,8 @@ export class Window<ModuleState = any> {
         Electron.ipcMain.handle(BridgeRequestType.PROCESS_MODULE_REQUEST + '_' + channelIndex, this.moduleRequestHandler.bind(this));
         Electron.ipcMain.handle(BridgeRequestType.PROCESS_PLUGIN_REQUEST + '_' + channelIndex, this.pluginRequestHandler.bind(this));
 
-        this._nativeWindow.webContents.on('preferred-size-changed', this.nativeWindowResizeHandler.bind(this));
         this._nativeWindow.webContents.on('did-finish-load', this.nativeWindowLoadedHandler.bind(this));
+        this._nativeWindow.webContents.on('preferred-size-changed', this.nativeWindowResizeHandler.bind(this));
         this._nativeWindow.on('closed', this.nativeWindowCloseHandler.bind(this));
 
         //-----------------------------------
@@ -137,7 +137,7 @@ export class Window<ModuleState = any> {
     }
 
     protected moduleRequestHandler(event:Electron.IpcMainEvent, moduleType:number, action:string, ...content:Vector<any>):Promise<any> {
-        if (this._isActive && event.sender === this._nativeWindow.webContents) {
+        if (this._isActive && this.checkTrustedWebContents(event.sender)) {
             if (this._moduleType === moduleType) {
                 return BridgeRemoteCallsHelper.execute(this._module, action, content);
             }
@@ -147,15 +147,19 @@ export class Window<ModuleState = any> {
     }
 
     protected pluginRequestHandler(event:Electron.IpcMainEvent, pluginType:number, action:string, ...content:Vector<any>):Promise<any> {
-        if (this._isActive && event.sender === this._nativeWindow.webContents) {
+        if (this._isActive && this.checkTrustedWebContents(event.sender)) {
             for (const plugin of Object.values(this._pluginsList)) {
                 if (plugin.pluginType === pluginType) {
-                    return BridgeRemoteCallsHelper.execute(pluginType, action, content);
+                    return BridgeRemoteCallsHelper.execute(plugin, action, content);
                 }
             }
         }
 
         return null;
+    }
+
+    protected checkTrustedWebContents(webContents:Electron.WebContents):boolean {
+        return (this._nativeWindow.webContents === webContents);
     }
 
     protected nativeWindowLoadedHandler():void {
@@ -168,7 +172,9 @@ export class Window<ModuleState = any> {
     protected async nativeWindowCloseHandler():Promise<void> {
         await this._module.dispose();
 
-        // TODO: detach all plugins from window
+        for (const plugin of Object.values(this._pluginsList)) {
+            plugin.detach();
+        }
 
         this._isActive = false;
     }
