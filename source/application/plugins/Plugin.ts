@@ -99,9 +99,9 @@ export abstract class AbstractPlugin<PluginState = any, PluginConfig = any, Plug
 }
 
 export abstract class Plugin<
-    PluginState = any, PluginViewType = any
+    PluginState = any, PluginConfig = any, PluginViewType = any
 > extends AbstractPlugin<
-    PluginState, PluginViewMethodsExtractor<PluginViewType>
+    PluginState, PluginConfig, PluginViewMethodsExtractor<PluginViewType>
 > {
     // specifying PluginView type without internal methods/properties,
     // mostly inherited from React.PureComponent class
