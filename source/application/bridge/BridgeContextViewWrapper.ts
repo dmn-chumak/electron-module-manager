@@ -17,7 +17,7 @@ export class BridgeContextViewWrapper implements ProxyHandler<any> {
         return new Proxy(
             Object.create(null), new BridgeContextViewWrapper(
                 webContents,
-                BridgeRequestType.INCOMING_PROCESS_MODULE_VIEW_REQUEST,
+                BridgeRequestType.PROCESS_MODULE_VIEW_REQUEST,
                 moduleType
             )
         );
@@ -35,7 +35,7 @@ export class BridgeContextViewWrapper implements ProxyHandler<any> {
         return new Proxy(
             Object.create(null), new BridgeContextViewWrapper(
                 webContents,
-                BridgeRequestType.INCOMING_PROCESS_PLUGIN_VIEW_REQUEST,
+                BridgeRequestType.PROCESS_PLUGIN_VIEW_REQUEST,
                 pluginType
             )
         );

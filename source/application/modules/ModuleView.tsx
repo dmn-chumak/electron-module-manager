@@ -37,14 +37,14 @@ export abstract class AbstractModuleView<ModuleType = any, ModuleState = any> ex
 
     public override componentDidMount():void {
         BridgeContextWrapper.appendEventListener(
-            BridgeRequestType.INCOMING_PROCESS_MODULE_VIEW_REQUEST,
+            BridgeRequestType.PROCESS_MODULE_VIEW_REQUEST,
             this.internal_moduleViewRequestHandler
         );
     }
 
     public override componentWillUnmount():void {
         BridgeContextWrapper.removeEventListener(
-            BridgeRequestType.INCOMING_PROCESS_MODULE_VIEW_REQUEST,
+            BridgeRequestType.PROCESS_MODULE_VIEW_REQUEST,
             this.internal_moduleViewRequestHandler
         );
     }

@@ -1,9 +1,9 @@
 export const enum BridgeRequestType {
-    INCOMING_INITIALIZE_MODULE_WINDOW = 'inc_initializeModuleWindow',
+    INITIALIZE_MODULE_WINDOW = 'initializeModuleWindow',
 
-    INCOMING_PROCESS_MODULE_VIEW_REQUEST = 'inc_processModuleViewRequest',
-    OUTGOING_PROCESS_MODULE_REQUEST = 'out_processModuleRequest',
+    PROCESS_MODULE_VIEW_REQUEST = 'processModuleViewRequest',
+    PROCESS_MODULE_REQUEST = 'processModuleRequest',
 
-    INCOMING_PROCESS_PLUGIN_VIEW_REQUEST = 'inc_processPluginViewRequest',
-    OUTGOING_PROCESS_PLUGIN_REQUEST = 'out_processPluginRequest'
+    PROCESS_PLUGIN_VIEW_REQUEST = 'processPluginViewRequest',
+    PROCESS_PLUGIN_REQUEST = 'processPluginRequest'
 }

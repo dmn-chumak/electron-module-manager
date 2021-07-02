@@ -12,7 +12,7 @@ import { WindowView } from './WindowView';
 export class WindowProcessWorker {
     public static createWindow<ModuleState = any>(windowView:Class<typeof WindowView>, elementSelector:string, moduleViewMap:Dictionary<Class<typeof ModuleView>> = null, pluginViewMap:Dictionary<Class<typeof PluginView>> = null):void {
         BridgeContextWrapper.appendEventListenerOnce(
-            BridgeRequestType.INCOMING_INITIALIZE_MODULE_WINDOW,
+            BridgeRequestType.INITIALIZE_MODULE_WINDOW,
             (options:WindowOptions<ModuleState>):void => {
                 const container = document.querySelector(elementSelector);
                 document.title = options.moduleTitle;

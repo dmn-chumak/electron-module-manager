@@ -30,14 +30,14 @@ export abstract class AbstractPluginView<PluginType = any, PluginState = any> ex
 
     public override componentDidMount():void {
         BridgeContextWrapper.appendEventListener(
-            BridgeRequestType.INCOMING_PROCESS_PLUGIN_VIEW_REQUEST,
+            BridgeRequestType.PROCESS_PLUGIN_VIEW_REQUEST,
             this.internal_pluginViewRequestHandler
         );
     }
 
     public override componentWillUnmount():void {
         BridgeContextWrapper.removeEventListener(
-            BridgeRequestType.INCOMING_PROCESS_PLUGIN_VIEW_REQUEST,
+            BridgeRequestType.PROCESS_PLUGIN_VIEW_REQUEST,
             this.internal_pluginViewRequestHandler
         );
     }

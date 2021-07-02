@@ -30,7 +30,7 @@ export class BridgeContextWrapper implements ProxyHandler<any> {
         return new Proxy(
             Object.create(null), new BridgeContextWrapper(
                 BridgeContextWrapper.context,
-                BridgeRequestType.OUTGOING_PROCESS_MODULE_REQUEST + '_' + channelIndex,
+                BridgeRequestType.PROCESS_MODULE_REQUEST + '_' + channelIndex,
                 moduleType
             )
         );
@@ -40,7 +40,7 @@ export class BridgeContextWrapper implements ProxyHandler<any> {
         return new Proxy(
             Object.create(null), new BridgeContextWrapper(
                 BridgeContextWrapper.context,
-                BridgeRequestType.OUTGOING_PROCESS_PLUGIN_REQUEST + '_' + channelIndex,
+                BridgeRequestType.PROCESS_PLUGIN_REQUEST + '_' + channelIndex,
                 pluginType
             )
         );
