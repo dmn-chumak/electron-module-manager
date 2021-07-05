@@ -1,47 +1,49 @@
 import { Application } from '../Application';
-import { BridgeContextView } from '../bridge/BridgeContextView';
-import { BridgeContextViewWrapper } from '../bridge/BridgeContextViewWrapper';
+import { BridgeContextEntity } from '../bridge/BridgeContextEntity';
 import { Window } from '../windows/Window';
 import { WindowBaseOptions } from '../windows/WindowBaseOptions';
-import { ModuleViewMethodsExtractor } from './ModuleTypeExtractors';
 
-export abstract class AbstractModule<ModuleState = any, ModuleViewType = any> {
+export abstract class Module<ModuleState = any> extends BridgeContextEntity<ModuleState> {
     protected readonly _application:Application;
     protected _activeWindow:Window<ModuleState>;
-    protected _activeModuleView:ModuleViewType & BridgeContextView<ModuleState>;
     protected readonly _moduleType:number;
-    protected _state:ModuleState;
 
     public constructor(application:Application, moduleType:number, state:ModuleState = null) {
+        super();
+
         this._application = application;
         this._activeWindow = null;
-        this._activeModuleView = BridgeContextViewWrapper.createDummyContext();
         this._moduleType = moduleType;
+
         this._state = state;
     }
 
-    public compose(window:Window<ModuleState>):void {
-        this._activeModuleView = BridgeContextViewWrapper.createModuleViewContext(window.nativeWebContents, this._moduleType);
+    public composeWindow(window:Window<ModuleState>):void {
         this._activeWindow = window;
     }
 
-    public dispose():void {
-        this._activeModuleView = BridgeContextViewWrapper.createDummyContext();
+    public disposeWindow():void {
         this._activeWindow = null;
     }
 
-    public updateState(state:Partial<ModuleState>):void {
-        this._activeModuleView.setState(state);
-
+    public updateState(state:Partial<Readonly<ModuleState>>):void {
         for (const property in state) {
             if (state.hasOwnProperty(property)) {
                 this._state[property] = state[property];
             }
         }
+
+        this.notifyView();
     }
 
-    public notifyState(state:Partial<ModuleState>):void {
-        this._activeModuleView.setState(state);
+    public notifyView():void {
+        if (this._activeWindow != null) {
+            const updatePatch = this.createUpdatePatch();
+
+            this._activeWindow.updateModuleState(
+                this._moduleType, updatePatch
+            );
+        }
     }
 
     public get windowOptions():Partial<WindowBaseOptions> {
@@ -52,10 +54,6 @@ export abstract class AbstractModule<ModuleState = any, ModuleViewType = any> {
         return this._moduleType;
     }
 
-    public get activeModuleView():ModuleViewType {
-        return this._activeModuleView;
-    }
-
     public get activeWindow():Window<ModuleState> {
         return this._activeWindow;
     }
@@ -63,13 +61,4 @@ export abstract class AbstractModule<ModuleState = any, ModuleViewType = any> {
     public get state():Readonly<ModuleState> {
         return this._state;
     }
-}
-
-export abstract class Module<
-    ModuleState = any, ModuleViewType = any
-> extends AbstractModule<
-    ModuleState, ModuleViewMethodsExtractor<ModuleViewType>
-> {
-    // specifying ModuleView type without internal methods/properties,
-    // mostly inherited from React.PureComponent class
 }

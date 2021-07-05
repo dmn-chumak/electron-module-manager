@@ -12,11 +12,11 @@ export class ModuleManager {
         this._application = application;
     }
 
-    public create<ModuleState = any>(moduleType:number, moduleState:ModuleState):Module {
+    public create<ModuleState = any>(moduleType:number, state:ModuleState = null):Module {
         const moduleClass = this._moduleClassesMap[moduleType];
 
         return new moduleClass(
-            this._application, moduleType, moduleState
+            this._application, moduleType, state
         );
     }
 }

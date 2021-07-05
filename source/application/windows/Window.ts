@@ -1,4 +1,5 @@
 import * as Electron from 'electron';
+import * as JsonPatch from 'fast-json-patch';
 import { Application } from '../Application';
 import { BridgeRemoteCallsHelper } from '../bridge/BridgeRemoteCallsHelper';
 import { BridgeRequestType } from '../bridge/BridgeRequestType';
@@ -13,14 +14,13 @@ export class Window<ModuleState = any> {
     protected readonly _application:Application;
     protected readonly _nativeWindow:Electron.BrowserWindow;
     protected readonly _channelIndex:number;
-    protected readonly _moduleType:number;
     protected readonly _pluginsList:Dictionary<Plugin>;
     protected readonly _windowOptions:WindowBaseOptions;
     protected readonly _module:Module<ModuleState>;
 
     protected _isActive:boolean;
 
-    public constructor(application:Application, channelIndex:number, windowOptions:WindowBaseOptions, moduleType:number, module:Module<ModuleState>, parent:Window = null) {
+    public constructor(application:Application, channelIndex:number, windowOptions:WindowBaseOptions, module:Module<ModuleState>, parent:Window = null) {
         this._nativeWindow = new Electron.BrowserWindow(this.createBrowserWindowOptions(windowOptions, parent));
 
         Electron.ipcMain.handle(BridgeRequestType.PROCESS_MODULE_REQUEST + '_' + channelIndex, this.moduleRequestHandler.bind(this));
@@ -36,7 +36,6 @@ export class Window<ModuleState = any> {
         this._channelIndex = channelIndex;
         this._module = module;
         this._windowOptions = windowOptions;
-        this._moduleType = moduleType;
         this._pluginsList = {};
 
         //-----------------------------------
@@ -45,7 +44,7 @@ export class Window<ModuleState = any> {
     }
 
     public async compose(windowPath:string):Promise<void> {
-        await this._module.compose(this);
+        await this._module.composeWindow(this);
         await this._nativeWindow.loadFile(windowPath);
 
         //-----------------------------------
@@ -118,7 +117,7 @@ export class Window<ModuleState = any> {
         return {
             ...this._windowOptions,
             moduleInitialState: this._module.state,
-            moduleType: this._moduleType,
+            moduleType: this._module.moduleType,
             channelIndex: this._channelIndex
         };
     }
@@ -138,7 +137,7 @@ export class Window<ModuleState = any> {
 
     protected moduleRequestHandler(event:Electron.IpcMainEvent, moduleType:number, action:string, ...content:Vector<any>):Promise<any> {
         if (this._isActive && this.checkTrustedWebContents(event.sender)) {
-            if (this._moduleType === moduleType) {
+            if (this._module.moduleType === moduleType) {
                 return BridgeRemoteCallsHelper.execute(this._module, action, content);
             }
         }
@@ -170,13 +169,31 @@ export class Window<ModuleState = any> {
     }
 
     protected async nativeWindowCloseHandler():Promise<void> {
-        await this._module.dispose();
+        await this._module.disposeWindow();
 
         for (const plugin of Object.values(this._pluginsList)) {
-            plugin.detach();
+            plugin.detachWindow();
         }
 
         this._isActive = false;
+    }
+
+    public updateModuleState(moduleType:number, patch:JsonPatch.Operation[]):void {
+        if (this._isActive) {
+            this._nativeWindow.webContents.send(
+                BridgeRequestType.PROCESS_MODULE_VIEW_UPDATE,
+                moduleType, patch
+            );
+        }
+    }
+
+    public updatePluginState(pluginType:number, patch:JsonPatch.Operation[]):void {
+        if (this._isActive) {
+            this._nativeWindow.webContents.send(
+                BridgeRequestType.PROCESS_PLUGIN_VIEW_UPDATE,
+                pluginType, patch
+            );
+        }
     }
 
     public attachPlugin(plugin:Plugin):void {
@@ -245,7 +262,7 @@ export class Window<ModuleState = any> {
     }
 
     public get moduleType():number {
-        return this._moduleType;
+        return this._module.moduleType;
     }
 
     public get isActive():boolean {

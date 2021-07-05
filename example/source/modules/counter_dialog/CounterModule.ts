@@ -3,9 +3,8 @@ import { Module } from 'electron-module-manager';
 import { ModuleType } from '../ModuleType';
 import { WorkspaceModuleState } from '../workspace/WorkspaceModuleState';
 import { CounterModuleState } from './CounterModuleState';
-import { CounterModuleView } from './CounterModuleView';
 
-export class CounterModule extends Module<CounterModuleState, CounterModuleView> {
+export class CounterModule extends Module<CounterModuleState> {
     public async increaseValue():Promise<void> {
         const currentState = this._application.windowManager.obtainState<WorkspaceModuleState>(ModuleType.WORKSPACE);
         const counter = currentState.counter + 1;

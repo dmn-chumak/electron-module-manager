@@ -1,11 +1,10 @@
+import * as JsonPatch from 'fast-json-patch';
 import * as React from 'react';
 import { BridgeContextWrapper } from '../bridge/BridgeContextWrapper';
-import { BridgeRemoteCallsHelper } from '../bridge/BridgeRemoteCallsHelper';
 import { BridgeRequestType } from '../bridge/BridgeRequestType';
-import { Vector } from '../Vector';
 import { PluginOptions } from './PluginOptions';
 import { PluginStateExtractor } from './PluginTypeExtractors';
-import { PluginMethodsExtractor } from './PluginTypeExtractors';
+import { PluginContext } from './PluginTypeExtractors';
 
 export abstract class AbstractPluginView<PluginType = any, PluginState = any> extends React.PureComponent<PluginOptions<PluginState>, PluginState> {
     protected readonly _context:PluginType;
@@ -22,23 +21,24 @@ export abstract class AbstractPluginView<PluginType = any, PluginState = any> ex
         };
     }
 
-    private internal_pluginViewRequestHandler = (pluginType:number, action:string, ...content:Vector<any>) => {
+    private internal_pluginViewUpdateHandler = (pluginType:number, patch:JsonPatch.Operation[]) => {
         if (pluginType === this.props.pluginType) {
-            BridgeRemoteCallsHelper.execute(this, action, content);
+            const pathResult = JsonPatch.applyPatch(this.state, patch, false, false);
+            this.setState(pathResult.newDocument);
         }
     };
 
     public override componentDidMount():void {
         BridgeContextWrapper.appendEventListener(
-            BridgeRequestType.PROCESS_PLUGIN_VIEW_REQUEST,
-            this.internal_pluginViewRequestHandler
+            BridgeRequestType.PROCESS_PLUGIN_VIEW_UPDATE,
+            this.internal_pluginViewUpdateHandler
         );
     }
 
     public override componentWillUnmount():void {
         BridgeContextWrapper.removeEventListener(
-            BridgeRequestType.PROCESS_PLUGIN_VIEW_REQUEST,
-            this.internal_pluginViewRequestHandler
+            BridgeRequestType.PROCESS_PLUGIN_VIEW_UPDATE,
+            this.internal_pluginViewUpdateHandler
         );
     }
 
@@ -52,7 +52,7 @@ export abstract class AbstractPluginView<PluginType = any, PluginState = any> ex
 export abstract class PluginView<
     PluginType = any, PluginState = any
 > extends AbstractPluginView<
-    PluginMethodsExtractor<PluginType>, PluginStateExtractor<PluginType> & Partial<PluginState>
+    PluginContext<PluginType>, PluginStateExtractor<PluginType> & Partial<PluginState>
 > {
     // specifying Plugin type without internal methods/properties,
     // and auto-extracting inherited PluginState type

@@ -1,8 +1,5 @@
-import { AbstractModule } from './Module';
-import { AbstractModuleView } from './ModuleView';
+import { Module } from './Module';
 
-export type ModuleStateExtractor<Type> = (Type extends AbstractModule<infer ModuleState> ? ModuleState : any);
+export type ModuleStateExtractor<Type> = (Type extends Module<infer ModuleState> ? ModuleState : any);
 
-export type ModuleViewMethodsExtractor<Type> = Omit<Type, keyof AbstractModuleView>;
-
-export type ModuleMethodsExtractor<Type> = Omit<Type, keyof AbstractModule>;
+export type ModuleContext<Type> = Omit<Type, keyof Module>;

@@ -1,8 +1,5 @@
-import { AbstractPlugin } from './Plugin';
-import { AbstractPluginView } from './PluginView';
+import { Plugin } from './Plugin';
 
-export type PluginStateExtractor<Type> = (Type extends AbstractPlugin<infer PluginState> ? PluginState : any);
+export type PluginStateExtractor<Type> = (Type extends Plugin<infer PluginState> ? PluginState : any);
 
-export type PluginViewMethodsExtractor<Type> = Omit<Type, keyof AbstractPluginView>;
-
-export type PluginMethodsExtractor<Type> = Omit<Type, keyof AbstractPlugin>;
+export type PluginContext<Type> = Omit<Type, keyof Plugin>;

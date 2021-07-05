@@ -5,12 +5,12 @@ import { BridgeRequestType } from './BridgeRequestType';
 
 export class BridgeContextWrapper implements ProxyHandler<any> {
     protected readonly _bridgeContext:BridgeContext;
-    protected readonly _entityType:number;
+    protected readonly _targetEntityType:number;
     protected readonly _channelType:string;
 
-    public constructor(bridgeContext:BridgeContext, channelType:string, entityType:number) {
+    public constructor(bridgeContext:BridgeContext, channelType:string, targetEntityType:number) {
         this._bridgeContext = bridgeContext;
-        this._entityType = entityType;
+        this._targetEntityType = targetEntityType;
         this._channelType = channelType;
     }
 
@@ -49,7 +49,8 @@ export class BridgeContextWrapper implements ProxyHandler<any> {
     public get(target:any, action:string):any {
         return (...content:Vector<any>) => {
             return this._bridgeContext.invokeRequest(
-                this._channelType, this._entityType, action, ...content
+                this._channelType, this._targetEntityType,
+                action, ...content
             );
         };
     }

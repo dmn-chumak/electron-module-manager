@@ -15,60 +15,47 @@ export class WindowManager {
 
     protected readonly _windowPath:string;
     protected readonly _bridgeScriptPath:string;
-    protected _nextIndex:number;
+    protected _nextChannel:number;
 
     private _parent:Window;
 
     public constructor(application:Application, moduleManager:ModuleManager, windowClass:Class<typeof Window>, windowPath:string, bridgeScriptPath:string) {
         this._application = application;
-        this._windowClass = windowClass;
         this._moduleManager = moduleManager;
-        this._windowsList = [];
+        this._windowClass = windowClass;
 
         //-----------------------------------
 
+        this._windowsList = [];
         this._windowPath = windowPath;
         this._bridgeScriptPath = bridgeScriptPath;
-        this._nextIndex = 0;
+        this._nextChannel = 0;
 
         //-----------------------------------
 
         this._parent = null;
     }
 
-    public async createWithClass<ModuleState>(windowClass:Class<typeof Window>, moduleType:number, moduleState:Readonly<ModuleState> = null, extraOptions:WindowBaseOptions = null, parent:Window = null):Promise<Window<ModuleState>> {
-        for (const window of this._windowsList) {
-            if (window.moduleType === moduleType) {
-                const module = window.module;
+    public async createWithClass<ModuleState>(windowClass:Class<typeof Window>, moduleType:number, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null, parent:Window = null):Promise<Window<ModuleState>> {
+        const active = this.obtainModuleWindow<ModuleState>(moduleType);
 
-                if (module.windowOptions.allowMultipleInstances !== true) {
-                    window.restore();
-                    return window;
-                }
-            }
+        if (active != null && active.windowOptions.allowMultipleInstances !== true) {
+            return active;
         }
 
         //-----------------------------------
 
         const module = this._moduleManager.create(moduleType, moduleState);
 
-        //-----------------------------------
-
         const windowOptions = this.createWindowOptions(
             module, extraOptions
         );
 
-        const windowParent = (
-            (parent == null)
-            ? (windowOptions.attachParent ? this._parent : null)
-            : parent
-        );
-
         const window = <Window<ModuleState>> new windowClass(
-            this._application,
-            this._nextIndex++,
-            windowOptions, moduleType, module,
-            windowParent
+            this._application, this._nextChannel++,
+            windowOptions, module, (
+                parent || (windowOptions.attachParent ? this._parent : null)
+            )
         );
 
         //-----------------------------------
@@ -82,7 +69,7 @@ export class WindowManager {
         return window;
     }
 
-    public async createParentWithClass<ModuleState>(windowClass:Class<typeof Window>, moduleType:number, moduleState:Readonly<ModuleState> = null, extraOptions:WindowBaseOptions = null):Promise<Window<ModuleState>> {
+    public async createParentWithClass<ModuleState>(windowClass:Class<typeof Window>, moduleType:number, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null):Promise<Window<ModuleState>> {
         extraOptions = { ...extraOptions, attachParent: false, isModal: false };
 
         //-----------------------------------
@@ -100,11 +87,11 @@ export class WindowManager {
         return window;
     }
 
-    public create<ModuleState>(moduleType:number, moduleState:Readonly<ModuleState> = null, extraOptions:WindowBaseOptions = null, parent:Window = null):Promise<Window<ModuleState>> {
+    public create<ModuleState>(moduleType:number, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null, parent:Window = null):Promise<Window<ModuleState>> {
         return this.createWithClass(this._windowClass, moduleType, moduleState, extraOptions, parent);
     }
 
-    public createParent<ModuleState>(moduleType:number, moduleState:Readonly<ModuleState> = null, extraOptions:WindowBaseOptions = null):Promise<Window<ModuleState>> {
+    public createParent<ModuleState>(moduleType:number, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null):Promise<Window<ModuleState>> {
         return this.createParentWithClass(this._windowClass, moduleType, moduleState, extraOptions);
     }
 

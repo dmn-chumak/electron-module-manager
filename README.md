@@ -33,7 +33,7 @@ export interface CounterModuleState {
 - Create **module class**, extending base _Module_ class:
 
 ```typescript
-export class CounterModule extends Module<CounterModuleState, CounterModuleView> {
+export class CounterModule extends Module<CounterModuleState> {
     public async increaseValue():Promise<void> {
         // updating module state and notifying module view
 
@@ -131,6 +131,12 @@ module.exports = {
     // ...
 };
 ```
+
+## Communication
+
+Starting from v2.3.0 communication between **Module** and **ModuleView** (view state updating) is done using [JSON patch](https://www.npmjs.com/package/fast-json-patch).
+
+It leads to a small overhead when modules have a simple state (1-2 fields). But, which is a more realistic situation, gives huge performance when modules state have a complex structure (arrays, trees with deep length, etc).
 
 ## Example
 

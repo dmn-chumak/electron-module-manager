@@ -13,7 +13,9 @@ export class BridgeContextDefault {
     }
 
     protected appendEventListener = (requestType:string, handler:(...content:Vector<any>) => void) => {
-        const pointer = requestType + '_' + (++this._nextIndex);
+        const listenerIndex = this._nextIndex;
+        const pointer = requestType + '_' + listenerIndex;
+        this._nextIndex++;
 
         Electron.ipcRenderer.on(
             requestType, this._handlersList[pointer] = (event:Electron.IpcRendererEvent, ...content:Vector<any>) => {
@@ -21,11 +23,13 @@ export class BridgeContextDefault {
             }
         );
 
-        return this._nextIndex;
+        return listenerIndex;
     };
 
     protected appendEventListenerOnce = (requestType:string, handler:(...content:Vector<any>) => void) => {
-        const pointer = requestType + '_' + (++this._nextIndex);
+        const listenerIndex = this._nextIndex;
+        const pointer = requestType + '_' + listenerIndex;
+        this._nextIndex++;
 
         Electron.ipcRenderer.once(
             requestType, this._handlersList[pointer] = (event:Electron.IpcRendererEvent, ...content:Vector<any>) => {
@@ -33,11 +37,11 @@ export class BridgeContextDefault {
             }
         );
 
-        return this._nextIndex;
+        return listenerIndex;
     };
 
-    protected removeEventListener = (requestType:string, index:number) => {
-        const pointer = requestType + '_' + index;
+    protected removeEventListener = (requestType:string, listenerIndex:number) => {
+        const pointer = requestType + '_' + listenerIndex;
 
         if (this._handlersList[pointer] != null) {
             Electron.ipcRenderer.off(requestType, this._handlersList[pointer]);

@@ -5,7 +5,7 @@ export interface BridgeContext {
 
     appendEventListenerOnce(requestType:string, handler:(...content:Vector<any>) => void):number;
 
-    removeEventListener(requestType:string, index:number):void;
+    removeEventListener(requestType:string, listenerIndex:number):void;
 
     invokeRequest(channelType:string, ...content:Vector<any>):Promise<any>;
 }

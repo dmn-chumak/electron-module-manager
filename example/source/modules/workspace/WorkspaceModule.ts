@@ -3,9 +3,8 @@ import { Module } from 'electron-module-manager';
 import { CounterModuleState } from '../counter_dialog/CounterModuleState';
 import { ModuleType } from '../ModuleType';
 import { WorkspaceModuleState } from './WorkspaceModuleState';
-import { WorkspaceModuleView } from './WorkspaceModuleView';
 
-export class WorkspaceModule extends Module<WorkspaceModuleState, WorkspaceModuleView> {
+export class WorkspaceModule extends Module<WorkspaceModuleState> {
     public async createCounterDialog():Promise<void> {
         await this._application.windowManager.create<CounterModuleState>(ModuleType.COUNTER, { counter: this._state.counter });
     }

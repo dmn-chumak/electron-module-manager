@@ -1,14 +1,13 @@
+import * as JsonPatch from 'fast-json-patch';
 import * as React from 'react';
 import { BridgeContextWrapper } from '../bridge/BridgeContextWrapper';
-import { BridgeRemoteCallsHelper } from '../bridge/BridgeRemoteCallsHelper';
 import { BridgeRequestType } from '../bridge/BridgeRequestType';
 import { Class } from '../Class';
 import { Dictionary } from '../Dictionary';
 import { PluginView } from '../plugins/PluginView';
-import { Vector } from '../Vector';
 import { ModuleOptions } from './ModuleOptions';
 import { ModuleStateExtractor } from './ModuleTypeExtractors';
-import { ModuleMethodsExtractor } from './ModuleTypeExtractors';
+import { ModuleContext } from './ModuleTypeExtractors';
 
 export interface ModuleProps<ModuleState = any> extends ModuleOptions<ModuleState> {
     pluginViewMap?:Dictionary<Class<typeof PluginView>>;
@@ -29,23 +28,24 @@ export abstract class AbstractModuleView<ModuleType = any, ModuleState = any> ex
         };
     }
 
-    private internal_moduleViewRequestHandler = (moduleType:number, action:string, ...content:Vector<any>) => {
+    private internal_moduleViewUpdateHandler = (moduleType:number, patch:JsonPatch.Operation[]) => {
         if (moduleType === this.props.moduleType) {
-            BridgeRemoteCallsHelper.execute(this, action, content);
+            const pathResult = JsonPatch.applyPatch(this.state, patch, false, false);
+            this.setState(pathResult.newDocument);
         }
     };
 
     public override componentDidMount():void {
         BridgeContextWrapper.appendEventListener(
-            BridgeRequestType.PROCESS_MODULE_VIEW_REQUEST,
-            this.internal_moduleViewRequestHandler
+            BridgeRequestType.PROCESS_MODULE_VIEW_UPDATE,
+            this.internal_moduleViewUpdateHandler
         );
     }
 
     public override componentWillUnmount():void {
         BridgeContextWrapper.removeEventListener(
-            BridgeRequestType.PROCESS_MODULE_VIEW_REQUEST,
-            this.internal_moduleViewRequestHandler
+            BridgeRequestType.PROCESS_MODULE_VIEW_UPDATE,
+            this.internal_moduleViewUpdateHandler
         );
     }
 
@@ -59,7 +59,7 @@ export abstract class AbstractModuleView<ModuleType = any, ModuleState = any> ex
 export abstract class ModuleView<
     ModuleType = any, ModuleState = any
 > extends AbstractModuleView<
-    ModuleMethodsExtractor<ModuleType>, ModuleStateExtractor<ModuleType> & Partial<ModuleState>
+    ModuleContext<ModuleType>, ModuleStateExtractor<ModuleType> & Partial<ModuleState>
 > {
     // specifying Module type without internal methods/properties,
     // and auto-extracting inherited ModuleState type
