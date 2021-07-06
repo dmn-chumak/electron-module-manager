@@ -50,8 +50,7 @@ export class PluginManager {
         for (const plugin of Object.values(this._pluginsList)) {
             plugin.resetState();
 
-            if (plugin.autoUpdateView)
-            {
+            if (plugin.autoUpdateView) {
                 plugin.updateView();
             }
         }
