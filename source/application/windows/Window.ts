@@ -171,7 +171,7 @@ export class Window<ModuleState = any> {
     }
 
     protected checkTrustedWebContents(webContents:Electron.WebContents):boolean {
-        return (this._nativeWindow.webContents === webContents);
+        return (this.nativeWebContents === webContents);
     }
 
     protected nativeWindowLoadedHandler():void {
@@ -193,7 +193,7 @@ export class Window<ModuleState = any> {
 
     public updateModuleWithPatch(moduleType:number, patch:JsonPatch.Operation[]):void {
         if (this._isActive && patch.length > 0) {
-            this._nativeWindow.webContents.send(
+            this.nativeWebContents.send(
                 BridgeRequestType.PROCESS_MODULE_VIEW_UPDATE, moduleType,
                 BridgeContextUpdateType.JSON_PATCH, patch
             );
@@ -202,7 +202,7 @@ export class Window<ModuleState = any> {
 
     public updateModuleState(moduleType:number, state:Partial<Readonly<ModuleState>>):void {
         if (this._isActive) {
-            this._nativeWindow.webContents.send(
+            this.nativeWebContents.send(
                 BridgeRequestType.PROCESS_MODULE_VIEW_UPDATE, moduleType,
                 BridgeContextUpdateType.STATE, state
             );
@@ -211,7 +211,7 @@ export class Window<ModuleState = any> {
 
     public updatePluginWithPatch(pluginType:number, patch:JsonPatch.Operation[]):void {
         if (this._isActive && patch.length > 0) {
-            this._nativeWindow.webContents.send(
+            this.nativeWebContents.send(
                 BridgeRequestType.PROCESS_PLUGIN_VIEW_UPDATE, pluginType,
                 BridgeContextUpdateType.JSON_PATCH, patch
             );
@@ -220,7 +220,7 @@ export class Window<ModuleState = any> {
 
     public updatePluginState(pluginType:number, state:any):void {
         if (this._isActive) {
-            this._nativeWindow.webContents.send(
+            this.nativeWebContents.send(
                 BridgeRequestType.PROCESS_PLUGIN_VIEW_UPDATE, pluginType,
                 BridgeContextUpdateType.STATE, state
             );
