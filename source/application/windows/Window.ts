@@ -179,7 +179,7 @@ export class Window<ModuleState = any> {
     }
 
     public updateModuleState(moduleType:number, patch:JsonPatch.Operation[]):void {
-        if (this._isActive) {
+        if (this._isActive && patch.length > 0) {
             this._nativeWindow.webContents.send(
                 BridgeRequestType.PROCESS_MODULE_VIEW_UPDATE,
                 moduleType, patch
@@ -188,7 +188,7 @@ export class Window<ModuleState = any> {
     }
 
     public updatePluginState(pluginType:number, patch:JsonPatch.Operation[]):void {
-        if (this._isActive) {
+        if (this._isActive && patch.length > 0) {
             this._nativeWindow.webContents.send(
                 BridgeRequestType.PROCESS_PLUGIN_VIEW_UPDATE,
                 pluginType, patch
