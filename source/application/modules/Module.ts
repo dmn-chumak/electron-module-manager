@@ -24,6 +24,7 @@ export abstract class Module<ModuleState = any> extends BridgeContextEntity<Modu
 
     public disposeWindow():void {
         this._activeWindow = null;
+        this._state = null;
     }
 
     public updateState(state:Partial<Readonly<ModuleState>>):void {
@@ -33,15 +34,23 @@ export abstract class Module<ModuleState = any> extends BridgeContextEntity<Modu
             }
         }
 
-        this.notifyView();
+        this.updateWithPatch();
     }
 
-    public notifyView():void {
+    public updateWithPatch():void {
         if (this._activeWindow != null) {
             const updatePatch = this.createUpdatePatch();
 
-            this._activeWindow.updateModuleState(
+            this._activeWindow.updateModuleWithPatch(
                 this._moduleType, updatePatch
+            );
+        }
+    }
+
+    public notifyState(state:Partial<Readonly<ModuleState>>):void {
+        if (this._activeWindow != null) {
+            this._activeWindow.updateModuleState(
+                this._moduleType, state
             );
         }
     }
@@ -56,6 +65,10 @@ export abstract class Module<ModuleState = any> extends BridgeContextEntity<Modu
 
     public get activeWindow():Window<ModuleState> {
         return this._activeWindow;
+    }
+
+    public get autoUpdateView():boolean {
+        return true;
     }
 
     public get state():Readonly<ModuleState> {

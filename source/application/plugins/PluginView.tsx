@@ -1,5 +1,6 @@
 import * as JsonPatch from 'fast-json-patch';
 import * as React from 'react';
+import { BridgeContextUpdateType } from '../bridge/BridgeContextUpdateType';
 import { BridgeContextWrapper } from '../bridge/BridgeContextWrapper';
 import { BridgeRequestType } from '../bridge/BridgeRequestType';
 import { PluginOptions } from './PluginOptions';
@@ -21,10 +22,14 @@ export abstract class AbstractPluginView<PluginType = any, PluginState = any> ex
         };
     }
 
-    private internal_pluginViewUpdateHandler = (pluginType:number, patch:JsonPatch.Operation[]) => {
+    private internal_pluginViewUpdateHandler = (pluginType:number, updateType:BridgeContextUpdateType, data:PluginState | JsonPatch.Operation[]) => {
         if (pluginType === this.props.pluginType) {
-            const pathResult = JsonPatch.applyPatch(this.state, patch, false, false);
-            this.setState(pathResult.newDocument);
+            if (updateType === BridgeContextUpdateType.JSON_PATCH) {
+                const pathResult = JsonPatch.applyPatch(this.state, data as JsonPatch.Operation[], false, false);
+                this.setState(pathResult.newDocument);
+            } else {
+                this.setState(data as PluginState);
+            }
         }
     };
 

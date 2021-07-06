@@ -147,6 +147,14 @@ export class WindowManager {
         }
     }
 
+    public notifyState<ModuleState>(moduleType:number, moduleState:Partial<ModuleState>):void {
+        for (const window of this._windowsList) {
+            if (window.moduleType === moduleType) {
+                window.module.notifyState(moduleState);
+            }
+        }
+    }
+
     public close(moduleType:number):void {
         for (let index = 0; index < this._windowsList.length; index++) {
             const window = this._windowsList[index];

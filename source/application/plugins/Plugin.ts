@@ -53,15 +53,23 @@ export abstract class Plugin<PluginState = any, PluginConfig = any> extends Brid
             }
         }
 
-        this.notifyView();
+        this.updateWithPatch();
     }
 
-    public notifyView():void {
+    public updateWithPatch():void {
         if (this._activeWindow != null) {
             const updatePatch = this.createUpdatePatch();
 
-            this._activeWindow.updatePluginState(
+            this._activeWindow.updatePluginWithPatch(
                 this._pluginType, updatePatch
+            );
+        }
+    }
+
+    public notifyState(state:Partial<Readonly<PluginState>>):void {
+        if (this._activeWindow != null) {
+            this._activeWindow.updatePluginState(
+                this._pluginType, state
             );
         }
     }
@@ -88,6 +96,10 @@ export abstract class Plugin<PluginState = any, PluginConfig = any> extends Brid
 
     public get activeWindow():Window {
         return this._activeWindow;
+    }
+
+    public get autoUpdateView():boolean {
+        return true;
     }
 
     public get state():PluginState {

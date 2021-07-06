@@ -1,6 +1,7 @@
 import * as Electron from 'electron';
 import * as JsonPatch from 'fast-json-patch';
 import { Application } from '../Application';
+import { BridgeContextUpdateType } from '../bridge/BridgeContextUpdateType';
 import { BridgeRemoteCallsHelper } from '../bridge/BridgeRemoteCallsHelper';
 import { BridgeRequestType } from '../bridge/BridgeRequestType';
 import { Dictionary } from '../Dictionary';
@@ -138,7 +139,13 @@ export class Window<ModuleState = any> {
     protected moduleRequestHandler(event:Electron.IpcMainEvent, moduleType:number, action:string, ...content:Vector<any>):Promise<any> {
         if (this._isActive && this.checkTrustedWebContents(event.sender)) {
             if (this._module.moduleType === moduleType) {
-                return BridgeRemoteCallsHelper.execute(this._module, action, content);
+                const result = BridgeRemoteCallsHelper.execute(this._module, action, content);
+
+                if (result == null && this._module.autoUpdateView) {
+                    this._module.updateWithPatch();
+                }
+
+                return result;
             }
         }
 
@@ -149,7 +156,13 @@ export class Window<ModuleState = any> {
         if (this._isActive && this.checkTrustedWebContents(event.sender)) {
             for (const plugin of Object.values(this._pluginsList)) {
                 if (plugin.pluginType === pluginType) {
-                    return BridgeRemoteCallsHelper.execute(plugin, action, content);
+                    const result = BridgeRemoteCallsHelper.execute(plugin, action, content);
+
+                    if (result == null && plugin.autoUpdateView) {
+                        plugin.updateWithPatch();
+                    }
+
+                    return result;
                 }
             }
         }
@@ -178,20 +191,38 @@ export class Window<ModuleState = any> {
         this._isActive = false;
     }
 
-    public updateModuleState(moduleType:number, patch:JsonPatch.Operation[]):void {
+    public updateModuleWithPatch(moduleType:number, patch:JsonPatch.Operation[]):void {
         if (this._isActive && patch.length > 0) {
             this._nativeWindow.webContents.send(
-                BridgeRequestType.PROCESS_MODULE_VIEW_UPDATE,
-                moduleType, patch
+                BridgeRequestType.PROCESS_MODULE_VIEW_UPDATE, moduleType,
+                BridgeContextUpdateType.JSON_PATCH, patch
             );
         }
     }
 
-    public updatePluginState(pluginType:number, patch:JsonPatch.Operation[]):void {
+    public updateModuleState(moduleType:number, state:Partial<Readonly<ModuleState>>):void {
+        if (this._isActive) {
+            this._nativeWindow.webContents.send(
+                BridgeRequestType.PROCESS_MODULE_VIEW_UPDATE, moduleType,
+                BridgeContextUpdateType.STATE, state
+            );
+        }
+    }
+
+    public updatePluginWithPatch(pluginType:number, patch:JsonPatch.Operation[]):void {
         if (this._isActive && patch.length > 0) {
             this._nativeWindow.webContents.send(
-                BridgeRequestType.PROCESS_PLUGIN_VIEW_UPDATE,
-                pluginType, patch
+                BridgeRequestType.PROCESS_PLUGIN_VIEW_UPDATE, pluginType,
+                BridgeContextUpdateType.JSON_PATCH, patch
+            );
+        }
+    }
+
+    public updatePluginState(pluginType:number, state:any):void {
+        if (this._isActive) {
+            this._nativeWindow.webContents.send(
+                BridgeRequestType.PROCESS_PLUGIN_VIEW_UPDATE, pluginType,
+                BridgeContextUpdateType.STATE, state
             );
         }
     }
