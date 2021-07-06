@@ -150,7 +150,7 @@ export class WindowManager {
     public notifyState<ModuleState>(moduleType:number, moduleState:Partial<ModuleState>):void {
         for (const window of this._windowsList) {
             if (window.moduleType === moduleType) {
-                window.module.notifyState(moduleState);
+                window.module.updateViewState(moduleState);
             }
         }
     }

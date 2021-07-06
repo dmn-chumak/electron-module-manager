@@ -27,30 +27,32 @@ export abstract class Module<ModuleState = any> extends BridgeContextEntity<Modu
         this._state = null;
     }
 
-    public updateState(state:Partial<Readonly<ModuleState>>):void {
+    public updateState(state:Partial<Readonly<ModuleState>>, notifyView:boolean = true):void {
         for (const property in state) {
             if (state.hasOwnProperty(property)) {
                 this._state[property] = state[property];
             }
         }
 
-        this.updateWithPatch();
+        if (notifyView) {
+            this.updateView();
+        }
     }
 
-    public updateWithPatch():void {
+    public updateViewState(state:Partial<Readonly<ModuleState>>):void {
+        if (this._activeWindow != null) {
+            this._activeWindow.updateModuleState(
+                this._moduleType, state
+            );
+        }
+    }
+
+    public updateView():void {
         if (this._activeWindow != null) {
             const updatePatch = this.createUpdatePatch();
 
             this._activeWindow.updateModuleWithPatch(
                 this._moduleType, updatePatch
-            );
-        }
-    }
-
-    public notifyState(state:Partial<Readonly<ModuleState>>):void {
-        if (this._activeWindow != null) {
-            this._activeWindow.updateModuleState(
-                this._moduleType, state
             );
         }
     }

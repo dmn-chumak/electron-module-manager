@@ -49,6 +49,11 @@ export class PluginManager {
     public resetPlugins():void {
         for (const plugin of Object.values(this._pluginsList)) {
             plugin.resetState();
+
+            if (plugin.autoUpdateView)
+            {
+                plugin.updateView();
+            }
         }
     }
 }

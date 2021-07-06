@@ -142,7 +142,7 @@ export class Window<ModuleState = any> {
                 const result = BridgeRemoteCallsHelper.execute(this._module, action, content);
 
                 if (result == null && this._module.autoUpdateView) {
-                    this._module.updateWithPatch();
+                    this._module.updateView();
                 }
 
                 return result;
@@ -159,7 +159,7 @@ export class Window<ModuleState = any> {
                     const result = BridgeRemoteCallsHelper.execute(plugin, action, content);
 
                     if (result == null && plugin.autoUpdateView) {
-                        plugin.updateWithPatch();
+                        plugin.updateView();
                     }
 
                     return result;
