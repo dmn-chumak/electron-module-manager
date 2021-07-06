@@ -136,13 +136,15 @@ export class Window<ModuleState = any> {
         }
     }
 
-    protected moduleRequestHandler(event:Electron.IpcMainEvent, moduleType:number, action:string, ...content:Vector<any>):Promise<any> {
+    protected async moduleRequestHandler(event:Electron.IpcMainEvent, moduleType:number, action:string, ...content:Vector<any>):Promise<any> {
         if (this._isActive && this.checkTrustedWebContents(event.sender)) {
-            if (this._module.moduleType === moduleType) {
-                const result = BridgeRemoteCallsHelper.execute(this._module, action, content);
+            const module = this._module;
 
-                if (result == null && this._module.autoUpdateView) {
-                    this._module.updateView();
+            if (module.moduleType === moduleType) {
+                const result = await BridgeRemoteCallsHelper.execute(module, action, content);
+
+                if (result == null && module.autoUpdateView) {
+                    module.updateView();
                 }
 
                 return result;
@@ -152,11 +154,11 @@ export class Window<ModuleState = any> {
         return null;
     }
 
-    protected pluginRequestHandler(event:Electron.IpcMainEvent, pluginType:number, action:string, ...content:Vector<any>):Promise<any> {
+    protected async pluginRequestHandler(event:Electron.IpcMainEvent, pluginType:number, action:string, ...content:Vector<any>):Promise<any> {
         if (this._isActive && this.checkTrustedWebContents(event.sender)) {
             for (const plugin of Object.values(this._pluginsList)) {
                 if (plugin.pluginType === pluginType) {
-                    const result = BridgeRemoteCallsHelper.execute(plugin, action, content);
+                    const result = await BridgeRemoteCallsHelper.execute(plugin, action, content);
 
                     if (result == null && plugin.autoUpdateView) {
                         plugin.updateView();

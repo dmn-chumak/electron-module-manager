@@ -25,13 +25,21 @@ export abstract class AbstractPluginView<PluginType = any, PluginState = any> ex
     private internal_pluginViewUpdateHandler = (pluginType:number, updateType:BridgeContextUpdateType, data:PluginState | JsonPatch.Operation[]) => {
         if (pluginType === this.props.pluginType) {
             if (updateType === BridgeContextUpdateType.JSON_PATCH) {
-                const pathResult = JsonPatch.applyPatch(this.state, data as JsonPatch.Operation[], false, false);
-                this.setState(pathResult.newDocument);
+                this.updateStateWithPatch(data as JsonPatch.Operation[]);
             } else {
-                this.setState(data as PluginState);
+                this.updateState(data as PluginState);
             }
         }
     };
+
+    protected updateStateWithPatch(path:JsonPatch.Operation[]):void {
+        const pathResult = JsonPatch.applyPatch(this.state, path, false, false);
+        this.setState(pathResult.newDocument);
+    }
+
+    protected updateState(state:PluginState):void {
+        this.setState(state);
+    }
 
     public override componentDidMount():void {
         BridgeContextWrapper.appendEventListener(

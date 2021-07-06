@@ -32,13 +32,21 @@ export abstract class AbstractModuleView<ModuleType = any, ModuleState = any> ex
     private internal_moduleViewUpdateHandler = (moduleType:number, updateType:BridgeContextUpdateType, data:ModuleState | JsonPatch.Operation[]) => {
         if (moduleType === this.props.moduleType) {
             if (updateType === BridgeContextUpdateType.JSON_PATCH) {
-                const pathResult = JsonPatch.applyPatch(this.state, data as JsonPatch.Operation[], false, false);
-                this.setState(pathResult.newDocument);
+                this.updateStateWithPatch(data as JsonPatch.Operation[]);
             } else {
-                this.setState(data as ModuleState);
+                this.updateState(data as ModuleState);
             }
         }
     };
+
+    protected updateStateWithPatch(path:JsonPatch.Operation[]):void {
+        const pathResult = JsonPatch.applyPatch(this.state, path, false, false);
+        this.setState(pathResult.newDocument);
+    }
+
+    protected updateState(state:ModuleState):void {
+        this.setState(state);
+    }
 
     public override componentDidMount():void {
         BridgeContextWrapper.appendEventListener(
