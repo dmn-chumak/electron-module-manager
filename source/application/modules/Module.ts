@@ -71,7 +71,7 @@ export abstract class Module<ModuleState = any> extends BridgeContextEntity<Modu
         return true;
     }
 
-    public get state():Readonly<ModuleState> {
+    public get state():ModuleState {
         return this._state;
     }
 }
