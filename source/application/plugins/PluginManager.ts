@@ -36,11 +36,11 @@ export class PluginManager {
     public saveConfig():Dictionary<any> {
         const pluginsConfig:Dictionary<any> = {};
 
-        for (const pluginType in this._pluginClassesMap) {
-            const config = this._pluginsList[pluginType].saveStateToConfig();
+        for (const plugin of Object.values(this._pluginsList)) {
+            const config = plugin.saveStateToConfig();
 
             if (config != null) {
-                pluginsConfig[pluginType] = config;
+                pluginsConfig[plugin.pluginType] = config;
             }
         }
 
