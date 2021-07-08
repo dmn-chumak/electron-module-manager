@@ -46,19 +46,7 @@ export abstract class Plugin<PluginState = any, PluginConfig = any> extends Brid
         this._activeWindow = null;
     }
 
-    public updateState(state:Partial<Readonly<PluginState>>, notifyView:boolean = true):void {
-        for (const property in state) {
-            if (state.hasOwnProperty(property)) {
-                this._state[property] = state[property];
-            }
-        }
-
-        if (notifyView) {
-            this.updateView();
-        }
-    }
-
-    public updateViewState(state:Partial<Readonly<PluginState>>):void {
+    public override updateViewState(state:Partial<Readonly<PluginState>>):void {
         if (this._activeWindow != null) {
             this._activeWindow.updatePluginState(
                 this._pluginType, state
@@ -66,7 +54,7 @@ export abstract class Plugin<PluginState = any, PluginConfig = any> extends Brid
         }
     }
 
-    public updateView():void {
+    public override updateView():void {
         if (this._activeWindow != null) {
             const updatePatch = this.createUpdatePatch();
 
@@ -98,10 +86,6 @@ export abstract class Plugin<PluginState = any, PluginConfig = any> extends Brid
 
     public get activeWindow():Window {
         return this._activeWindow;
-    }
-
-    public get autoUpdateView():boolean {
-        return true;
     }
 
     public get state():PluginState {

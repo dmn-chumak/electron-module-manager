@@ -1,4 +1,5 @@
 import { Application } from '../Application';
+import { BridgeContextUpdateType } from '../bridge/BridgeContextUpdateType';
 import { Class } from '../Class';
 import { Dictionary } from '../Dictionary';
 import { Plugin } from './Plugin';
@@ -50,8 +51,12 @@ export class PluginManager {
         for (const plugin of Object.values(this._pluginsList)) {
             plugin.resetState();
 
-            if (plugin.autoUpdateView) {
+            if (plugin.stateAutoUpdateType === BridgeContextUpdateType.STATE) {
+                plugin.updateViewState(plugin.state);
+            } else if (plugin.stateAutoUpdateType === BridgeContextUpdateType.JSON_PATCH) {
                 plugin.updateView();
+            } else {
+                // empty..
             }
         }
     }

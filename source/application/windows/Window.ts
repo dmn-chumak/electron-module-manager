@@ -143,8 +143,12 @@ export class Window<ModuleState = any> {
             if (module.moduleType === moduleType) {
                 const result = await BridgeRemoteCallsHelper.execute(module, action, content);
 
-                if (result == null && module.autoUpdateView) {
+                if (module.stateAutoUpdateType === BridgeContextUpdateType.STATE) {
+                    module.updateViewState(module.state);
+                } else if (module.stateAutoUpdateType === BridgeContextUpdateType.JSON_PATCH) {
                     module.updateView();
+                } else {
+                    // empty..
                 }
 
                 return result;
@@ -160,8 +164,12 @@ export class Window<ModuleState = any> {
                 if (plugin.pluginType === pluginType) {
                     const result = await BridgeRemoteCallsHelper.execute(plugin, action, content);
 
-                    if (result == null && plugin.autoUpdateView) {
+                    if (plugin.stateAutoUpdateType === BridgeContextUpdateType.STATE) {
+                        plugin.updateViewState(plugin.state);
+                    } else if (plugin.stateAutoUpdateType === BridgeContextUpdateType.JSON_PATCH) {
                         plugin.updateView();
+                    } else {
+                        // empty..
                     }
 
                     return result;

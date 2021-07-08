@@ -27,19 +27,7 @@ export abstract class Module<ModuleState = any> extends BridgeContextEntity<Modu
         this._state = null;
     }
 
-    public updateState(state:Partial<Readonly<ModuleState>>, notifyView:boolean = true):void {
-        for (const property in state) {
-            if (state.hasOwnProperty(property)) {
-                this._state[property] = state[property];
-            }
-        }
-
-        if (notifyView) {
-            this.updateView();
-        }
-    }
-
-    public updateViewState(state:Partial<Readonly<ModuleState>>):void {
+    public override updateViewState(state:Partial<Readonly<ModuleState>>):void {
         if (this._activeWindow != null) {
             this._activeWindow.updateModuleState(
                 this._moduleType, state
@@ -47,7 +35,7 @@ export abstract class Module<ModuleState = any> extends BridgeContextEntity<Modu
         }
     }
 
-    public updateView():void {
+    public override updateView():void {
         if (this._activeWindow != null) {
             const updatePatch = this.createUpdatePatch();
 
@@ -67,10 +55,6 @@ export abstract class Module<ModuleState = any> extends BridgeContextEntity<Modu
 
     public get activeWindow():Window<ModuleState> {
         return this._activeWindow;
-    }
-
-    public get autoUpdateView():boolean {
-        return true;
     }
 
     public get state():ModuleState {
