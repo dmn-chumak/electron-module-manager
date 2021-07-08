@@ -2,6 +2,7 @@ export * from './application/bridge/BridgeContext';
 export * from './application/bridge/BridgeContextDefault';
 export * from './application/bridge/BridgeContextDefaultPath';
 export * from './application/bridge/BridgeContextEntity';
+export * from './application/bridge/BridgeContextUpdateType';
 export * from './application/bridge/BridgeContextWrapper';
 export * from './application/bridge/BridgeProcessWorker';
 export * from './application/bridge/BridgeRemoteCallsHelper';
