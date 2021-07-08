@@ -4,7 +4,6 @@ import { Application } from '../Application';
 import { BridgeContextUpdateType } from '../bridge/BridgeContextUpdateType';
 import { BridgeRemoteCallsHelper } from '../bridge/BridgeRemoteCallsHelper';
 import { BridgeRequestType } from '../bridge/BridgeRequestType';
-import { Dictionary } from '../Dictionary';
 import { Module } from '../modules/Module';
 import { Plugin } from '../plugins/Plugin';
 import { Vector } from '../Vector';
@@ -15,7 +14,7 @@ export class Window<ModuleState = any> {
     protected readonly _application:Application;
     protected readonly _nativeWindow:Electron.BrowserWindow;
     protected readonly _channelIndex:number;
-    protected readonly _pluginsList:Dictionary<Plugin>;
+    protected readonly _pluginsList:Plugin[];
     protected readonly _windowOptions:WindowBaseOptions;
     protected readonly _module:Module<ModuleState>;
 
@@ -25,6 +24,7 @@ export class Window<ModuleState = any> {
         this._nativeWindow = new Electron.BrowserWindow(this.createBrowserWindowOptions(windowOptions, parent));
 
         Electron.ipcMain.handle(BridgeRequestType.PROCESS_MODULE_REQUEST + '_' + channelIndex, this.moduleRequestHandler.bind(this));
+        Electron.ipcMain.handle(BridgeRequestType.PREPARE_PLUGIN_VIEW_STATE + '_' + channelIndex, this.pluginStateRequestHandler.bind(this));
         Electron.ipcMain.handle(BridgeRequestType.PROCESS_PLUGIN_REQUEST + '_' + channelIndex, this.pluginRequestHandler.bind(this));
 
         this._nativeWindow.webContents.on('did-finish-load', this.nativeWindowLoadedHandler.bind(this));
@@ -37,7 +37,7 @@ export class Window<ModuleState = any> {
         this._channelIndex = channelIndex;
         this._module = module;
         this._windowOptions = windowOptions;
-        this._pluginsList = {};
+        this._pluginsList = [];
 
         //-----------------------------------
 
@@ -158,9 +158,21 @@ export class Window<ModuleState = any> {
         return null;
     }
 
+    protected async pluginStateRequestHandler(event:Electron.IpcMainEvent, pluginType:number):Promise<any> {
+        if (this._isActive && this.checkTrustedWebContents(event.sender)) {
+            for (const plugin of this._pluginsList) {
+                if (plugin.pluginType === pluginType) {
+                    return plugin.state;
+                }
+            }
+        }
+
+        return null;
+    }
+
     protected async pluginRequestHandler(event:Electron.IpcMainEvent, pluginType:number, action:string, ...content:Vector<any>):Promise<any> {
         if (this._isActive && this.checkTrustedWebContents(event.sender)) {
-            for (const plugin of Object.values(this._pluginsList)) {
+            for (const plugin of this._pluginsList) {
                 if (plugin.pluginType === pluginType) {
                     const result = await BridgeRemoteCallsHelper.execute(plugin, action, content);
 
@@ -194,8 +206,8 @@ export class Window<ModuleState = any> {
     protected async nativeWindowCloseHandler():Promise<void> {
         await this._module.disposeWindow();
 
-        for (const plugin of Object.values(this._pluginsList)) {
-            plugin.detachWindow();
+        while (this._pluginsList.length > 0) {
+            this._pluginsList.pop().detachWindow();
         }
 
         this._isActive = false;
@@ -238,11 +250,19 @@ export class Window<ModuleState = any> {
     }
 
     public attachPlugin(plugin:Plugin):void {
-        this._pluginsList[plugin.pluginType] = plugin;
+        const index = this._pluginsList.indexOf(plugin);
+
+        if (index === -1) {
+            this._pluginsList.push(plugin);
+        }
     }
 
     public detachPlugin(plugin:Plugin):void {
-        delete this._pluginsList[plugin.pluginType];
+        const index = this._pluginsList.indexOf(plugin);
+
+        if (index !== -1) {
+            this._pluginsList.splice(index, 1);
+        }
     }
 
     public closeDevTools():void {

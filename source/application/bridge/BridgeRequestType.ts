@@ -5,5 +5,6 @@ export const enum BridgeRequestType {
     PROCESS_MODULE_REQUEST = 'processModuleRequest',
 
     PROCESS_PLUGIN_VIEW_UPDATE = 'processPluginViewUpdate',
-    PROCESS_PLUGIN_REQUEST = 'processPluginRequest'
+    PROCESS_PLUGIN_REQUEST = 'processPluginRequest',
+    PREPARE_PLUGIN_VIEW_STATE = 'preparePluginViewState'
 }

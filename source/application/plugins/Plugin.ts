@@ -56,7 +56,7 @@ export abstract class Plugin<PluginState = any, PluginConfig = any> extends Brid
 
     public override updateView():void {
         if (this._activeWindow != null) {
-            const updatePatch = this.createUpdatePatch();
+            const updatePatch = this.generateUpdatePatch();
 
             this._activeWindow.updatePluginWithPatch(
                 this._pluginType, updatePatch

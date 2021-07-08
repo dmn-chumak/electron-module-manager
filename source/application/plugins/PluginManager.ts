@@ -16,7 +16,7 @@ export class PluginManager {
     }
 
     public initFromConfig(version:string, pluginsConfig:Dictionary<any>):void {
-        for (const pluginType of Object.keys(this._pluginClassesMap)) {
+        for (const pluginType in this._pluginClassesMap) {
             const pluginClass = this._pluginClassesMap[pluginType];
             const config = pluginsConfig[pluginType];
 
@@ -36,7 +36,7 @@ export class PluginManager {
     public saveConfig():Dictionary<any> {
         const pluginsConfig:Dictionary<any> = {};
 
-        for (const pluginType of Object.keys(this._pluginsList)) {
+        for (const pluginType in this._pluginClassesMap) {
             const config = this._pluginsList[pluginType].saveStateToConfig();
 
             if (config != null) {

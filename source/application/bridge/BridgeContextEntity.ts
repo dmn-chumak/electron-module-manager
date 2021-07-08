@@ -54,7 +54,7 @@ export abstract class BridgeContextEntity<StateType = any> {
         }
     }
 
-    protected createUpdatePatch():JsonPatch.Operation[] {
+    protected generateUpdatePatch():JsonPatch.Operation[] {
         if (this._internalObserver != null) {
             return JsonPatch.generate(this._internalObserver);
         }
