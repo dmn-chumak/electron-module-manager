@@ -29,7 +29,7 @@ export abstract class AbstractModuleView<ModuleType = any, ModuleState = any> ex
         };
     }
 
-    private internal_moduleViewUpdateHandler = (moduleType:number, updateType:BridgeContextUpdateType, data:ModuleState | JsonPatch.Operation[]) => {
+    private internal_moduleViewUpdateHandler = (moduleType:string, updateType:BridgeContextUpdateType, data:ModuleState | JsonPatch.Operation[]) => {
         if (moduleType === this.props.moduleType) {
             if (updateType === BridgeContextUpdateType.JSON_PATCH) {
                 this.updateStateWithPatch(data as JsonPatch.Operation[]);

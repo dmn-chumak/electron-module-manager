@@ -5,10 +5,10 @@ import { BridgeRequestType } from './BridgeRequestType';
 
 export class BridgeContextWrapper implements ProxyHandler<any> {
     protected readonly _bridgeContext:BridgeContext;
-    protected readonly _targetEntityType:number;
+    protected readonly _targetEntityType:string;
     protected readonly _channelType:string;
 
-    public constructor(bridgeContext:BridgeContext, channelType:string, targetEntityType:number) {
+    public constructor(bridgeContext:BridgeContext, channelType:string, targetEntityType:string) {
         this._bridgeContext = bridgeContext;
         this._targetEntityType = targetEntityType;
         this._channelType = channelType;
@@ -26,7 +26,7 @@ export class BridgeContextWrapper implements ProxyHandler<any> {
         BridgeContextWrapper.context.removeEventListener(requestType, handler.nativeIndex);
     }
 
-    public static createModuleContext<ContextType>(channelIndex:number, moduleType:number):ContextType {
+    public static createModuleContext<ContextType>(channelIndex:number, moduleType:string):ContextType {
         return new Proxy(
             Object.create(null), new BridgeContextWrapper(
                 BridgeContextWrapper.context,
@@ -36,7 +36,7 @@ export class BridgeContextWrapper implements ProxyHandler<any> {
         );
     }
 
-    public static createPluginContext<ContextType>(channelIndex:number, pluginType:number):ContextType {
+    public static createPluginContext<ContextType>(channelIndex:number, pluginType:string):ContextType {
         return new Proxy(
             Object.create(null), new BridgeContextWrapper(
                 BridgeContextWrapper.context,

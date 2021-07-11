@@ -1,4 +1,4 @@
 export const enum ModuleType {
-    WORKSPACE,
-    COUNTER
+    WORKSPACE = 'workspace',
+    COUNTER = 'counter'
 }

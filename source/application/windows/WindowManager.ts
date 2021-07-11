@@ -36,7 +36,7 @@ export class WindowManager {
         this._parent = null;
     }
 
-    public async createWithClass<ModuleState>(windowClass:Class<typeof Window>, moduleType:number, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null, parent:Window = null):Promise<Window<ModuleState>> {
+    public async createWithClass<ModuleState>(windowClass:Class<typeof Window>, moduleType:string, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null, parent:Window = null):Promise<Window<ModuleState>> {
         const active = this.obtainModuleWindow<ModuleState>(moduleType);
 
         if (active != null && active.windowOptions.allowMultipleInstances !== true) {
@@ -69,7 +69,7 @@ export class WindowManager {
         return window;
     }
 
-    public async createParentWithClass<ModuleState>(windowClass:Class<typeof Window>, moduleType:number, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null):Promise<Window<ModuleState>> {
+    public async createParentWithClass<ModuleState>(windowClass:Class<typeof Window>, moduleType:string, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null):Promise<Window<ModuleState>> {
         extraOptions = { ...extraOptions, attachParent: false, isModal: false };
 
         //-----------------------------------
@@ -87,11 +87,11 @@ export class WindowManager {
         return window;
     }
 
-    public create<ModuleState>(moduleType:number, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null, parent:Window = null):Promise<Window<ModuleState>> {
+    public create<ModuleState>(moduleType:string, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null, parent:Window = null):Promise<Window<ModuleState>> {
         return this.createWithClass(this._windowClass, moduleType, moduleState, extraOptions, parent);
     }
 
-    public createParent<ModuleState>(moduleType:number, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null):Promise<Window<ModuleState>> {
+    public createParent<ModuleState>(moduleType:string, moduleState:ModuleState = null, extraOptions:WindowBaseOptions = null):Promise<Window<ModuleState>> {
         return this.createParentWithClass(this._windowClass, moduleType, moduleState, extraOptions);
     }
 
@@ -119,7 +119,7 @@ export class WindowManager {
         };
     }
 
-    public obtainModule<ModuleState>(moduleType:number):Module<ModuleState> {
+    public obtainModule<ModuleState>(moduleType:string):Module<ModuleState> {
         const window = this.obtainModuleWindow<ModuleState>(moduleType);
 
         if (window != null) {
@@ -129,7 +129,7 @@ export class WindowManager {
         return null;
     }
 
-    public obtainModuleWindow<ModuleState>(moduleType:number):Window<ModuleState> {
+    public obtainModuleWindow<ModuleState>(moduleType:string):Window<ModuleState> {
         for (const window of this._windowsList) {
             if (window.moduleType === moduleType) {
                 return window;
@@ -139,7 +139,7 @@ export class WindowManager {
         return null;
     }
 
-    public updateState<ModuleState>(moduleType:number, moduleState:Partial<ModuleState>):void {
+    public updateState<ModuleState>(moduleType:string, moduleState:Partial<ModuleState>):void {
         for (const window of this._windowsList) {
             if (window.moduleType === moduleType) {
                 window.module.updateState(moduleState);
@@ -147,7 +147,7 @@ export class WindowManager {
         }
     }
 
-    public notifyState<ModuleState>(moduleType:number, moduleState:Partial<ModuleState>):void {
+    public notifyState<ModuleState>(moduleType:string, moduleState:Partial<ModuleState>):void {
         for (const window of this._windowsList) {
             if (window.moduleType === moduleType) {
                 window.module.updateViewState(moduleState);
@@ -155,7 +155,7 @@ export class WindowManager {
         }
     }
 
-    public close(moduleType:number):void {
+    public close(moduleType:string):void {
         for (let index = 0; index < this._windowsList.length; index++) {
             const window = this._windowsList[index];
 
@@ -172,7 +172,7 @@ export class WindowManager {
         }
     }
 
-    public obtainState<ModuleState>(moduleType:number):ModuleState {
+    public obtainState<ModuleState>(moduleType:string):ModuleState {
         for (const window of this._windowsList) {
             if (window.moduleType === moduleType) {
                 return window.module.state;

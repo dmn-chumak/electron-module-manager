@@ -12,7 +12,7 @@ export class ModuleManager {
         this._application = application;
     }
 
-    public create<ModuleState = any>(moduleType:number, state:ModuleState = null):Module {
+    public create<ModuleState = any>(moduleType:string, state:ModuleState = null):Module {
         const moduleClass = this._moduleClassesMap[moduleType];
 
         return new moduleClass(

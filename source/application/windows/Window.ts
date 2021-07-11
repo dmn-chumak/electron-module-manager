@@ -136,7 +136,7 @@ export class Window<ModuleState = any> {
         }
     }
 
-    protected async moduleRequestHandler(event:Electron.IpcMainEvent, moduleType:number, action:string, ...content:Vector<any>):Promise<any> {
+    protected async moduleRequestHandler(event:Electron.IpcMainEvent, moduleType:string, action:string, ...content:Vector<any>):Promise<any> {
         if (this._isActive && this.checkTrustedWebContents(event.sender)) {
             const module = this._module;
 
@@ -158,7 +158,7 @@ export class Window<ModuleState = any> {
         return null;
     }
 
-    protected async pluginStateRequestHandler(event:Electron.IpcMainEvent, pluginType:number):Promise<any> {
+    protected async pluginStateRequestHandler(event:Electron.IpcMainEvent, pluginType:string):Promise<any> {
         if (this._isActive && this.checkTrustedWebContents(event.sender)) {
             for (const plugin of this._pluginsList) {
                 if (plugin.pluginType === pluginType) {
@@ -170,7 +170,7 @@ export class Window<ModuleState = any> {
         return null;
     }
 
-    protected async pluginRequestHandler(event:Electron.IpcMainEvent, pluginType:number, action:string, ...content:Vector<any>):Promise<any> {
+    protected async pluginRequestHandler(event:Electron.IpcMainEvent, pluginType:string, action:string, ...content:Vector<any>):Promise<any> {
         if (this._isActive && this.checkTrustedWebContents(event.sender)) {
             for (const plugin of this._pluginsList) {
                 if (plugin.pluginType === pluginType) {
@@ -213,7 +213,7 @@ export class Window<ModuleState = any> {
         this._isActive = false;
     }
 
-    public updateModuleWithPatch(moduleType:number, patch:JsonPatch.Operation[]):void {
+    public updateModuleWithPatch(moduleType:string, patch:JsonPatch.Operation[]):void {
         if (this._isActive && patch.length > 0) {
             this.nativeWebContents.send(
                 BridgeRequestType.PROCESS_MODULE_VIEW_UPDATE, moduleType,
@@ -222,7 +222,7 @@ export class Window<ModuleState = any> {
         }
     }
 
-    public updateModuleState(moduleType:number, state:Partial<Readonly<ModuleState>>):void {
+    public updateModuleState(moduleType:string, state:Partial<Readonly<ModuleState>>):void {
         if (this._isActive) {
             this.nativeWebContents.send(
                 BridgeRequestType.PROCESS_MODULE_VIEW_UPDATE, moduleType,
@@ -231,7 +231,7 @@ export class Window<ModuleState = any> {
         }
     }
 
-    public updatePluginWithPatch(pluginType:number, patch:JsonPatch.Operation[]):void {
+    public updatePluginWithPatch(pluginType:string, patch:JsonPatch.Operation[]):void {
         if (this._isActive && patch.length > 0) {
             this.nativeWebContents.send(
                 BridgeRequestType.PROCESS_PLUGIN_VIEW_UPDATE, pluginType,
@@ -240,7 +240,7 @@ export class Window<ModuleState = any> {
         }
     }
 
-    public updatePluginState(pluginType:number, state:any):void {
+    public updatePluginState(pluginType:string, state:any):void {
         if (this._isActive) {
             this.nativeWebContents.send(
                 BridgeRequestType.PROCESS_PLUGIN_VIEW_UPDATE, pluginType,
@@ -322,7 +322,7 @@ export class Window<ModuleState = any> {
         return this._nativeWindow;
     }
 
-    public get moduleType():number {
+    public get moduleType():string {
         return this._module.moduleType;
     }
 

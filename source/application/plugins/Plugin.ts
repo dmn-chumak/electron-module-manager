@@ -6,10 +6,10 @@ import { PluginBaseOptions } from './PluginBaseOptions';
 export abstract class Plugin<PluginState = any, PluginConfig = any> extends BridgeContextEntity<PluginState> {
     protected readonly _application:Application;
     protected _activeWindow:Window;
-    protected readonly _pluginType:number;
+    protected readonly _pluginType:string;
     protected _isLocked:boolean;
 
-    public constructor(application:Application, pluginType:number) {
+    public constructor(application:Application, pluginType:string) {
         super();
 
         this._application = application;
@@ -80,7 +80,7 @@ export abstract class Plugin<PluginState = any, PluginConfig = any> extends Brid
         return null;
     }
 
-    public get pluginType():number {
+    public get pluginType():string {
         return this._pluginType;
     }
 

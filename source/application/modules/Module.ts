@@ -6,9 +6,9 @@ import { WindowBaseOptions } from '../windows/WindowBaseOptions';
 export abstract class Module<ModuleState = any> extends BridgeContextEntity<ModuleState> {
     protected readonly _application:Application;
     protected _activeWindow:Window<ModuleState>;
-    protected readonly _moduleType:number;
+    protected readonly _moduleType:string;
 
-    public constructor(application:Application, moduleType:number, state:ModuleState = null) {
+    public constructor(application:Application, moduleType:string, state:ModuleState = null) {
         super();
 
         this._application = application;
@@ -49,7 +49,7 @@ export abstract class Module<ModuleState = any> extends BridgeContextEntity<Modu
         return null;
     }
 
-    public get moduleType():number {
+    public get moduleType():string {
         return this._moduleType;
     }
 

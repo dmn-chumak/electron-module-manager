@@ -22,7 +22,7 @@ export abstract class AbstractPluginView<PluginType = any, PluginState = any> ex
         };
     }
 
-    private internal_pluginViewUpdateHandler = (pluginType:number, updateType:BridgeContextUpdateType, data:PluginState | JsonPatch.Operation[]) => {
+    private internal_pluginViewUpdateHandler = (pluginType:string, updateType:BridgeContextUpdateType, data:PluginState | JsonPatch.Operation[]) => {
         if (pluginType === this.props.pluginType) {
             if (updateType === BridgeContextUpdateType.JSON_PATCH) {
                 this.updateStateWithPatch(data as JsonPatch.Operation[]);

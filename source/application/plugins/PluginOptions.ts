@@ -1,5 +1,5 @@
 export interface PluginOptions<PluginState = any> {
     initialState:Readonly<PluginState>;
-    pluginType:number;
+    pluginType:string;
     channelIndex:number;
 }

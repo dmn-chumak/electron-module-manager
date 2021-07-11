@@ -21,7 +21,7 @@ export class PluginManager {
             const config = pluginsConfig[pluginType];
 
             if (pluginClass != null) {
-                const plugin = new pluginClass(this._application, parseInt(pluginType));
+                const plugin = new pluginClass(this._application, pluginType);
                 this._pluginsList[pluginType] = plugin;
 
                 if (config != null) {
