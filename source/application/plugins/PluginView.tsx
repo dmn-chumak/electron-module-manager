@@ -32,9 +32,9 @@ export abstract class AbstractPluginView<PluginType = any, PluginState = any> ex
         }
     };
 
-    protected updateStateWithPatch(path:JsonPatch.Operation[]):void {
-        const pathResult = JsonPatch.applyPatch(this.state, path, false, false);
-        this.setState(pathResult.newDocument);
+    protected updateStateWithPatch(patch:JsonPatch.Operation[]):void {
+        const patchResult = JsonPatch.applyPatch(this.state, patch, false, false);
+        this.setState(patchResult.newDocument);
     }
 
     protected updateState(state:PluginState):void {
