@@ -36,9 +36,9 @@ export abstract class Module<ModuleState = any> extends BridgeContextEntity<Modu
     }
 
     public override updateView():void {
-        if (this._activeWindow != null) {
-            const updatePatch = this.generateUpdatePatch();
+        const updatePatch = this.generateUpdatePatch();
 
+        if (this._activeWindow != null) {
             this._activeWindow.updateModuleWithPatch(
                 this._moduleType, updatePatch
             );

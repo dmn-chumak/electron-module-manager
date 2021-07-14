@@ -1,7 +1,7 @@
 {
     "name": "electron-module-manager-example",
     "description": "A simple example of electron-module-manager usage",
-    "version": "2.4.10",
+    "version": "2.4.11",
     "homepage": "https://github.com/dmn-chumak/electron-module-manager",
     "main": "./output/application.js",
     "author": "dmn-chumak",
