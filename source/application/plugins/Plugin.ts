@@ -38,11 +38,17 @@ export abstract class Plugin<PluginState = any, PluginConfig = any> extends Brid
 
     public attachWindow(window:Window):void {
         this._activeWindow = window;
-        this._activeWindow.attachPlugin(this);
+
+        if (this._activeWindow != null) {
+            this._activeWindow.attachPlugin(this);
+        }
     }
 
     public detachWindow():void {
-        this._activeWindow.detachPlugin(this);
+        if (this._activeWindow != null) {
+            this._activeWindow.detachPlugin(this);
+        }
+
         this._activeWindow = null;
     }
 

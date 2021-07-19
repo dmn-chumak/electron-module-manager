@@ -19,7 +19,6 @@ npm install electron-module-manager
 export const enum ModuleType {
     COUNTER
 }
-
 ```
 
 - Create an interface with the **module state** (_optional_):

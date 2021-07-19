@@ -17,7 +17,7 @@ export class WindowManager {
     protected readonly _bridgeScriptPath:string;
     protected _nextChannel:number;
 
-    private _parent:Window;
+    protected _parent:Window;
 
     public constructor(application:Application, moduleManager:ModuleManager, windowClass:Class<typeof Window>, windowPath:string, bridgeScriptPath:string) {
         this._application = application;
@@ -104,6 +104,10 @@ export class WindowManager {
 
                 if (this._parent === window) {
                     this._parent = null;
+                }
+
+                if (this._parent != null) {
+                    this._parent.restore();
                 }
 
                 break;
