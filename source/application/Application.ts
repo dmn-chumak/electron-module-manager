@@ -1,6 +1,8 @@
 import * as Electron from 'electron';
+import { BridgeRequestType } from './bridge/BridgeRequestType';
 import { Class } from './Class';
 import { Dictionary } from './Dictionary';
+import { NodeExceptionHandler } from './exceptions/NodeExceptionHandler';
 import { Module } from './modules/Module';
 import { ModuleManager } from './modules/ModuleManager';
 import { Plugin } from './plugins/Plugin';
@@ -30,6 +32,7 @@ export class Application {
 
             //-----------------------------------
 
+            Electron.ipcMain.handle(BridgeRequestType.PROCESS_UNHANDLED_ERROR, this.appProcessErrorsHandler.bind(this));
             Electron.app.on('second-instance', this.appSecondInstanceHandler.bind(this));
             Electron.app.on('window-all-closed', this.appAllWindowsClosedHandler.bind(this));
             Electron.app.on('ready', this.appReadyHandler.bind(this));
@@ -54,6 +57,10 @@ export class Application {
 
     protected createPluginManager(pluginClassesMap:Dictionary<Class<typeof Plugin>>):PluginManager {
         return new PluginManager(this, pluginClassesMap);
+    }
+
+    protected appProcessErrorsHandler(event:Electron.IpcMainEvent, error:Error):void {
+        NodeExceptionHandler.handleError(error);
     }
 
     protected appSecondInstanceHandler():void {

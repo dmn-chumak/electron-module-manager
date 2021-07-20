@@ -1,10 +1,15 @@
 import * as Electron from 'electron';
 import { Application } from 'electron-module-manager';
 import * as Path from 'path';
+import { NodeExceptionHandler } from '../../source';
 import { CounterModule } from './modules/counter_dialog/CounterModule';
 import { ModuleType } from './modules/ModuleType';
 import { WorkspaceModule } from './modules/workspace/WorkspaceModule';
 import { WorkspaceModuleState } from './modules/workspace/WorkspaceModuleState';
+
+//-----------------------------------
+
+NodeExceptionHandler.initialize();
 
 //-----------------------------------
 
